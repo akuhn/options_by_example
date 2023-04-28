@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class UsageByExample
-  VERSION = "1.0.0"
+  VERSION = '1.0.0'
 end
+
 
 __END__
 
@@ -12,5 +13,14 @@ __END__
 
 1.0.0
 
-  - First release
-  - ...
+  - Extract optional and required argument names from a usage text
+  - Extract option names and associated argument names (if any) from a usage text
+  - Include help option by default
+  - Parse options and arguments from command-line arguments aka ARGV
+  - Exit gracefully or raise exceptions, depending on the exit_on_error parameter
+  - Implement dynamic methods for checking options and getting arguments
+  - Ensure correct git tag and all changes committed when building gem
+
+0.0.0
+
+  - Prehistory starts here...

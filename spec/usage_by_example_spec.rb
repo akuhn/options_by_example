@@ -32,9 +32,6 @@ describe UsageByExample do
     DATA = StringIO.new usage_message
     Options = UsageByExample.read(DATA).parse(ARGV)
 
-    p Options.options
-    p Options.arguments
-
     expect(Options.include_secure?).to be true
     expect(Options.argument_host).to eq 'example.com'
     expect(Options.argument_port).to eq '80'
@@ -120,20 +117,3 @@ describe UsageByExample do
   end
 end
 
-
-__END__
-Establishes network connection to designated host and port, enabling
-users to assess network connectivity and diagnose potential issues.
-
-Usage: connect [options] [mode] host port
-
-Options:
-  -s, --secure        Establish a secure connection (SSL/TSL)
-  -v, --verbose       Enable verbose output for detailed information
-  -r, --retries NUM   Number of connection retries (default 3)
-  -t, --timeout NUM   Connection timeout in seconds (default 10)
-
-Arguments:
-  [mode]              Optional connection mode (active or passive)
-  host                The target host to connect to (e.g., example.com)
-  port                The target port to connect to (e.g., 80)
