@@ -5,6 +5,14 @@ require_relative "usage_by_example/version"
 
 class UsageByExample
 
+  attr_reader :argument_names_optional
+  attr_reader :argument_names_required
+  attr_reader :option_names
+
+  attr_reader :arguments
+  attr_reader :options
+
+
   def self.read(data)
     return new data.read
   end
@@ -46,7 +54,7 @@ class UsageByExample
     @option_names.update("-h" => :help, "--help" => :help)
   end
 
-  def parse(argv)
+  def parse(argv, exit_on_error: true)
     array = argv.dup
     @arguments = {}
     @options = {}
@@ -73,6 +81,9 @@ class UsageByExample
 
     # --- 2) Parse optional arguments ---------------------------------
 
+    # Check any start with --, ie excess options
+    # Check min_length - max_length here
+
     stash = array.pop(@argument_names_required.length)
     @argument_names_optional.each do |argument_name|
       break if array.empty?
@@ -95,25 +106,27 @@ class UsageByExample
     if not array.empty?
       # Custom error message if most recent option did not require argument
       raise "Got unexpected argument for option #{most_recent_option}" if most_recent_option
-      min_length = @argument_names.length
-      max_length = @argument_names.length + @argument_names_optional.length
       raise "Expected #{min_length}#{"-#{max_length}" if max_length > min_length} arguments, got more"
     end
 
     return self
 
   rescue RuntimeError => err
-    puts "ERROR: #{err.message}\n\n" unless err.message.empty?
-    puts @usage
-    exit
+    if exit_on_error
+      puts "ERROR: #{err.message}\n\n" unless err.message.empty?
+      puts @usage
+      exit
+    else
+      raise # Reraise the same exception
+    end
   end
 
   def method_missing(sym, *args, &block)
     case sym
-    when /^argument_(.*)$/
+    when /^argument_(\w+)$/
       val = @arguments[$1]
       block && val ? block.call(val) : val
-    when /^include_(.*)\?$/
+    when /^include_(\w+)\?$/
       @options[$1]
     else
       super

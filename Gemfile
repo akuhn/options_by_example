@@ -2,7 +2,8 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in usage_by_example.gemspec
-gemspec
+gemspec # Specify your gem's dependencies in usage_by_example.gemspec
 
-gem "rake", "~> 13.0"
+gem 'pry'
+gem 'rspec'
+
