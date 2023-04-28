@@ -27,6 +27,11 @@ describe OptionsByExample do
     }
   }
 
+  let(:this) {
+    OptionsByExample.new(usage_message).use(exit_on_error: false)
+  }
+
+
   it 'reads and parses options from DATA and ARGV' do
     ARGV.clear.concat %w{--secure example.com 80}
     DATA = StringIO.new usage_message
@@ -36,8 +41,6 @@ describe OptionsByExample do
     expect(Options.argument_host).to eq 'example.com'
     expect(Options.argument_port).to eq '80'
   end
-
-  let(:this) { OptionsByExample.new(usage_message) }
 
   describe "#initialize" do
 
@@ -55,7 +58,6 @@ describe OptionsByExample do
         -v --verbose
         -r --retries
         -t --timeout
-        -h --help
       }
     end
   end
@@ -69,28 +71,40 @@ describe OptionsByExample do
       expect(this.arguments.keys).to match_array %w{retries mode host port}
     end
 
-    it "raises an error for unknown options" do
-      argv = %w{--gibberish example.com 80}
-
+    it 'raises an error for unknown options' do
       expect {
-        this.parse argv, exit_on_error: false
-      }.to raise_error "Got unknown option --gibberish"
+        this.parse %w{--gibberish example.com 80}
+      }.to raise_error "Found unknown option '--gibberish'"
     end
 
-    it "raises an error for missing required arguments" do
-      argv = %w{--secure example.com}
-
+    it 'raises an error for missing required arguments' do
       expect {
-        this.parse argv, exit_on_error: false
-      }.to raise_error "Expected required argument PORT, got none"
+        this.parse %w{--secure example.com}
+      }.to raise_error "Missing required argument 'port'"
     end
 
-    it "raises an error for unexpected arguments" do
-      argv = %w{--secure gibberish active example.com 80}
-
+    it 'raises an error for missing arguments' do
       expect {
-        this.parse argv, exit_on_error: false
-      }.to raise_error "Got unexpected argument for option --secure"
+        this.parse %w{--retries --secure example.com 80}
+      }.to raise_error "Expected argument for option '--retries', got none"
+    end
+
+    it 'raises an error for unexpected arguments' do
+      expect {
+        this.parse %w{--secure gibberish active example.com 80}
+      }.to raise_error "Expected 2-3 arguments, but received too many"
+    end
+
+    it 'raises an error for options in argument section' do
+      expect {
+        this.parse %w{example.com --secure}
+      }.to raise_error "Expected arguments, but found option '--secure'"
+    end
+
+    it 'raises an error for too many arguments' do
+      expect {
+        this.parse %w{active example.com 80 gibberish}
+      }.to raise_error "Expected 2-3 arguments, but received too many"
     end
   end
 
@@ -108,11 +122,87 @@ describe OptionsByExample do
       expect(this.argument_timeout).to be_nil
     end
 
-    it "returns option status when called with include_NAME? method" do
+    it 'returns option status when called with include_NAME? method' do
       expect(this.include_secure?).to be true
       expect(this.include_verbose?).to be true
       expect(this.include_retries?).to be true
       expect(this.include_timeout?).to be_falsey
+    end
+  end
+
+  describe "usage message without arguments" do
+
+    let(:usage_message) {
+      %{
+        Prints out a friendly greeting message to the current user.
+
+        Usage: greet [options]
+
+        Options:
+            -f, --formal        Use a formal greeting instead of an informal one
+            -v, --verbose       Enable verbose output for detailed information
+      }
+    }
+
+    it 'parses empty ARGV' do
+      this.parse %w{}
+
+      expect(this.include_formal?).to be_falsey
+      expect(this.include_verbose?).to be_falsey
+    end
+
+    it 'raises an error for any arguments' do
+      expect {
+        this.parse %w{gibberish}
+      }.to raise_error "Expected 0 arguments, but received too many"
+    end
+
+    it 'raises an error for unknown options' do
+      expect {
+        this.parse %w{--gibberish}
+      }.to raise_error "Found unknown option '--gibberish'"
+    end
+  end
+
+  describe "usage message without options" do
+
+    let(:usage_message) {
+      %{
+        This script redirects all traffic from one port to another.
+
+        Usage: redirect SOURCE DEST
+      }
+    }
+
+    it 'parses example arguments' do
+      this.parse %w{80 443}
+
+      expect(this.argument_source).to eq "80"
+      expect(this.argument_dest).to eq "443"
+    end
+
+    # it 'parses the default help option' do
+    #   expect {
+    #     this.use(exit_on_error: true).parse %w{--help}
+    #   }.to raise_error SystemExit
+    # end
+
+    it 'raises an error for emtpy ARGV' do
+      expect {
+        this.parse %w{}
+      }.to raise_error "Missing required argument 'source'"
+    end
+
+    it 'raises an error for too many arguments' do
+      expect {
+        this.parse %w{in out gibberish}
+      }.to raise_error "Expected 2 arguments, but received too many"
+    end
+
+    it 'raises an error for unknown options' do
+      expect {
+        this.parse %w{--verbose}
+      }.to raise_error "Found unknown option '--verbose'"
     end
   end
 end
