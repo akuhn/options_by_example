@@ -1,35 +1,48 @@
-# UsageByExample
+# Usage by Example
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/usage_by_example`. To experiment with that code, run `bin/console` for an interactive prompt.
+No-code options parser that automatically detects command-line options from the usage text of your application. This intuitive parser identifies optional and required argument names as well as option names without requiring any additional code, making it easy to manage user input for your command-line applications.
 
-TODO: Delete this and the text above, and describe your gem
+Features
 
-## Installation
+- Automatically detects optional and required argument names from usage text
+- Automatically detects option names and associated arguments (if any) from usage text
+- Parses those arguments and options from the command line (ARGV)
+- Raises errors for unknown options or missing required arguments
 
-Add this line to your application's Gemfile:
+
+Example
 
 ```ruby
-gem 'usage_by_example'
+require 'usage_by_example'
+
+Options = UsageByExample.read(DATA).parse(ARGV)
+
+puts Options.include_secure?
+puts Options.include_verbose?
+puts Options.include_retries?
+puts Options.include_timeout?
+puts Options.argument_retries
+puts Options.argument_timeout
+puts Options.argument_mode
+puts Options.argument_host
+puts Options.argument_port
+
+
+__END__
+Establishes a network connection to a designated host and port, enabling
+users to assess network connectivity and diagnose potential problems.
+
+Usage: connect [options] [mode] host port
+
+Options:
+  -s, --secure        Establish a secure connection (SSL/TSL)
+  -v, --verbose       Enable verbose output for detailed information
+  -r, --retries NUM   Specify the number of connection retries (default 3)
+  -t, --timeout NUM   Set the connection timeout in seconds (default 10)
+
+Arguments:
+  [mode]              Optional connection mode (active or passive)
+  host                The target host to connect to (e.g., example.com)
+  port                The target port to connect to (e.g., 80)
 ```
 
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install usage_by_example
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/usage_by_example.
