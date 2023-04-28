@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "usage_by_example/version"
+require_relative "options_by_example/version"
 
 
-class UsageByExample
+class OptionsByExample
 
   attr_reader :argument_names_optional
   attr_reader :argument_names_required

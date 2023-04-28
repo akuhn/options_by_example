@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 
-describe UsageByExample do
+describe OptionsByExample do
 
   it 'has a version number' do
-    expect(UsageByExample::VERSION).not_to be nil
+    expect(OptionsByExample::VERSION).not_to be nil
   end
 
   let(:usage_message) {
@@ -30,14 +30,14 @@ describe UsageByExample do
   it 'reads and parses options from DATA and ARGV' do
     ARGV.concat %w{--secure example.com 80}
     DATA = StringIO.new usage_message
-    Options = UsageByExample.read(DATA).parse(ARGV)
+    Options = OptionsByExample.read(DATA).parse(ARGV)
 
     expect(Options.include_secure?).to be true
     expect(Options.argument_host).to eq 'example.com'
     expect(Options.argument_port).to eq '80'
   end
 
-  let(:this) { UsageByExample.new(usage_message) }
+  let(:this) { OptionsByExample.new(usage_message) }
 
   describe "#initialize" do
 

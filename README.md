@@ -1,4 +1,4 @@
-# Usage by Example
+# Options by Example
 
 No-code options parser that automatically detects command-line options from the usage text of your application. This intuitive parser identifies optional and required argument names as well as option names without requiring any additional code, making it easy to manage user input for your command-line applications.
 
@@ -13,9 +13,9 @@ Features
 Example
 
 ```ruby
-require 'usage_by_example'
+require 'options_by_example'
 
-Options = UsageByExample.read(DATA).parse(ARGV)
+Options = OptionsByExample.read(DATA).parse(ARGV)
 
 puts Options.include_secure?
 puts Options.include_verbose?

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UsageByExample
+class OptionsByExample
   VERSION = '1.1.0'
 end
 
