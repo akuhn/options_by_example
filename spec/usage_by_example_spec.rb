@@ -28,7 +28,7 @@ describe OptionsByExample do
   }
 
   it 'reads and parses options from DATA and ARGV' do
-    ARGV.concat %w{--secure example.com 80}
+    ARGV.clear.concat %w{--secure example.com 80}
     DATA = StringIO.new usage_message
     Options = OptionsByExample.read(DATA).parse(ARGV)
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "lib/options_by_example/version"
+require './lib/options_by_example/version'
 
 
 # Verify that the gem is being built with matching git tag and gem version,
@@ -30,10 +30,12 @@ Gem::Specification.new do |spec|
 
   spec.summary = "No-code options parser that extracts arguments directly from usage text."
   spec.homepage = "https://github.com/akuhn/options_by_example"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 1.9.3"
 
-  spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/akuhn/options_by_example"
+  if spec.respond_to? :metadata
+    spec.metadata["homepage_uri"] = spec.homepage
+    spec.metadata["source_code_uri"] = "https://github.com/akuhn/options_by_example"
+  end
 
   spec.require_paths = ["lib"]
   spec.files = %w{

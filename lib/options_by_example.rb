@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "options_by_example/version"
+require 'options_by_example/version'
 
 
 class OptionsByExample
@@ -46,7 +46,7 @@ class OptionsByExample
     @option_names = {}
     text.scan(/((--?\w+)(, --?\w+)*) ?(\w+)?/) do
       opts = $1.split(", ")
-      opts.each { |each| @option_names[each] = [opts.last.tr('-', ''), $4&.downcase] }
+      opts.each { |each| @option_names[each] = [opts.last.tr('-', ''), ($4.downcase if $4)] }
     end
 
     # ---- 3) Include help option by default --------------------------
@@ -54,7 +54,7 @@ class OptionsByExample
     @option_names.update("-h" => :help, "--help" => :help)
   end
 
-  def parse(argv, exit_on_error: true)
+  def parse(argv, options = nil)
     array = argv.dup
     @arguments = {}
     @options = {}
@@ -106,12 +106,15 @@ class OptionsByExample
     if not array.empty?
       # Custom error message if most recent option did not require argument
       raise "Got unexpected argument for option #{most_recent_option}" if most_recent_option
+      min_length = @argument_names_required.size
+      max_length = @argument_names_optional.size + min_length
       raise "Expected #{min_length}#{"-#{max_length}" if max_length > min_length} arguments, got more"
     end
 
     return self
 
   rescue RuntimeError => err
+    exit_on_error = options ? options[:exit_on_error] : true
     if exit_on_error
       puts "ERROR: #{err.message}\n\n" unless err.message.empty?
       puts @usage

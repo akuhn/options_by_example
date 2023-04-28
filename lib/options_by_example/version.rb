@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '1.1.0'
+  VERSION = '1.2.0'
 end
 
 
@@ -11,10 +11,15 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
-1.0.1
+1.2.0
 
-  - Update readme file with features and an example
+  - Ensure compatibility with Ruby versions 1.9.3 and newer
+
+1.1.0
+
+  - Renamed the gem from usage_by_example to options_by_example
   - Update the gemspec to include readme and ruby files only
+  - Update readme file with features and an example
 
 1.0.0
 
