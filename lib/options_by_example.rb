@@ -20,7 +20,7 @@ class OptionsByExample
 
   def initialize(text)
     @settings = {exit_on_error: true}
-    @usage = text.gsub('$0', File.basename($0)).gsub(/\n+\Z/, "\n\n")
+    @usage_message = text.gsub('$0', File.basename($0)).gsub(/\n+\Z/, "\n\n")
 
     # --- 1) Parse argument names -------------------------------------
     #
@@ -48,7 +48,7 @@ class OptionsByExample
     @option_names = {}
     text.scan(/((--?\w+)(, --?\w+)*) ?(\w+)?/) do
       opts = $1.split(", ")
-      opts.each { |each| @option_names[each] = [opts.last.tr('-', ''), ($4.downcase if $4)] }
+      opts.each { |each| @option_names[each] = [opts.last.tr('-', ''), $4] }
     end
   end
 
@@ -60,10 +60,9 @@ class OptionsByExample
 
   def parse(argv)
     parser = Parser.new(
-      @settings,
-      @option_names,
-      @argument_names_optional,
       @argument_names_required,
+      @argument_names_optional,
+      @option_names,
     )
 
     parser.parse argv
@@ -72,6 +71,16 @@ class OptionsByExample
     @arguments = parser.arguments
 
     return self
+  rescue RuntimeError => err
+    raise unless @settings[:exit_on_error]
+
+    if err.message == "puts @usage_message"
+      puts @usage_message
+    else
+      puts "ERROR: #{err.message}"
+    end
+
+    exit 1
   end
 
 
