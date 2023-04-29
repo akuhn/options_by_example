@@ -13,8 +13,8 @@ __END__
 
 1.3.0
 
-  - Extract parser into class
-  - Improved error messages
+  - Extract parsing functionality into class
+  - Better error messages
 
 1.2.0
 

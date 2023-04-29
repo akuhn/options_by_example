@@ -22,18 +22,11 @@ class OptionsByExample
       # chunks plus handling any remaining arguments. This organization
       # facilitates further processing and validation of the input.
 
-      @chunks = array.slice_before { |each| each.start_with?(?-) }.entries
-      @remainder = @chunks.pop || []
-      if @remainder && @remainder.first && @remainder.first.start_with?(?-)
-        option_name, argument_name = @option_names[@remainder.first]
-        @chunks.push @remainder.shift(argument_name ? 2 : 1)
-      end
-
-      # Detect unexpected arguments, error will be raised later in the
-      # parse_options method so refer to proceeding option name.
-
-      if @chunks.any? && !@chunks.first.first.start_with?(?-)
-        @unexpected_args = @chunks.shift
+      @chunks = []
+      @remainder = current = []
+      array.each do |each|
+        @chunks << current = [] if each.start_with?(?-)
+        current << each
       end
 
       find_help_option
@@ -45,7 +38,6 @@ class OptionsByExample
       parse_optional_arguments
 
       raise "Internal error: unreachable state" unless @remainder.empty?
-      raise "Internal error: unreachable state" if @unexpected_args
     end
 
     private
@@ -67,17 +59,19 @@ class OptionsByExample
 
     def parse_options
       @chunks.each do |option, *args|
-        if @unexpected_args
+        if @remainder.any?
           raise "Unexpected arguments found before option '#{option}', please provide all options before arguments"
         end
 
         option_name, argument_name = @option_names[option]
         @options[option_name] = true
+
         if argument_name
           raise "Expected argument for option '#{option}', got none" if args.empty?
           @arguments[option_name] = args.shift
         end
-        @unexpected_args = args.any?
+
+        @remainder = args
       end
     end
 
