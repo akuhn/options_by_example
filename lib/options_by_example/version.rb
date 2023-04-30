@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '1.3.0'
+  VERSION = '2.0.0'
 end
 
 
@@ -11,9 +11,14 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
+2.0.0
+
+  - Replaced dynamic methods with explicit methods for options and arguments
+  - Removed ability to call dynamic methods with undeclared names
+
 1.3.0
 
-  - Extract parsing functionality into class
+  - Extracted parsing functionality into class
   - Better error messages
 
 1.2.0

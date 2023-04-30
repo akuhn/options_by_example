@@ -6,20 +6,14 @@ require 'options_by_example/parser'
 
 class OptionsByExample
 
-  attr_reader :argument_names_optional
-  attr_reader :argument_names_required
-  attr_reader :option_names
-
   attr_reader :arguments
   attr_reader :options
-
 
   def self.read(data)
     return new data.read
   end
 
   def initialize(text)
-    @settings = {exit_on_error: true}
     @usage_message = text.gsub('$0', File.basename($0)).gsub(/\n+\Z/, "\n\n")
 
     # --- 1) Parse argument names -------------------------------------
@@ -50,15 +44,22 @@ class OptionsByExample
       opts = $1.split(", ")
       opts.each { |each| @option_names[each] = [opts.last.tr('-', ''), $4] }
     end
-  end
 
-  def use(settings)
-    @settings.update settings
-
-    return self
+    initialize_argument_accessors
+    initialize_option_accessors
   end
 
   def parse(argv)
+    parse_without_exit argv
+  rescue PrintUsageMessage
+    puts @usage_message
+    exit 0
+  rescue RuntimeError => err
+    puts "ERROR: #{err.message}"
+    exit 1
+  end
+
+  def parse_without_exit(argv)
     parser = Parser.new(
       @argument_names_required,
       @argument_names_optional,
@@ -66,33 +67,36 @@ class OptionsByExample
     )
 
     parser.parse argv
-
-    @options = parser.options
     @arguments = parser.arguments
+    @options = parser.options
 
     return self
-  rescue RuntimeError => err
-    raise unless @settings[:exit_on_error]
-
-    if err.message == "puts @usage_message"
-      puts @usage_message
-    else
-      puts "ERROR: #{err.message}"
-    end
-
-    exit 1
   end
 
+  private
 
-  def method_missing(sym, *args, &block)
-    case sym
-    when /^argument_(\w+)$/
-      val = @arguments[$1]
-      block && val ? block.call(val) : val
-    when /^include_(\w+)\?$/
-      @options[$1]
-    else
-      super
+  def initialize_argument_accessors
+    [
+      *@argument_names_required,
+      *@argument_names_optional,
+      *@option_names.values.select(&:last).map(&:first),
+    ].each do |argument_name|
+      instance_eval %{
+        def argument_#{argument_name}
+          val = @arguments["#{argument_name}"]
+          val && block_given? ? (yield val) : val
+        end
+      }
+    end
+  end
+
+  def initialize_option_accessors
+    @option_names.each_value do |option_name, _|
+      instance_eval %{
+        def include_#{option_name}?
+          @options.include? "#{option_name}"
+        end
+      }
     end
   end
 end

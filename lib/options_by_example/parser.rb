@@ -2,6 +2,10 @@
 
 
 class OptionsByExample
+
+  class PrintUsageMessage < StandardError
+  end
+
   class Parser
 
     attr_reader :options
@@ -46,7 +50,7 @@ class OptionsByExample
       @chunks.each do |option, *args|
         case option
         when '-h', '--help'
-          raise "puts @usage_message"
+          raise PrintUsageMessage
         end
       end
     end
