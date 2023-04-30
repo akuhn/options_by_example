@@ -255,5 +255,30 @@ describe OptionsByExample do
       }.to raise_error "Found unknown option '--verbose'"
     end
   end
+
+  describe '#expand_combined_shorthand_options' do
+
+    it 'parses combined shorthand options' do
+      this.parse_without_exit %w{-svt 60 example 443}
+
+      expect(this.include_secure?).to be true
+      expect(this.include_verbose?).to be true
+      expect(this.include_retries?).to be_falsey
+      expect(this.include_timeout?).to be true
+      expect(this.argument_timeout).to eq '60'
+    end
+
+    it 'raises an error for unknown shorthands' do
+      expect {
+        this.parse_without_exit %w{-vrbs example 443}
+      }.to raise_error "Found unknown option -b inside '-vrbs'"
+    end
+
+    it 'raises an error for unknown shorthands that match longhand' do
+      expect {
+        this.parse_without_exit %w{-verbose example 443}
+      }.to raise_error "Found unknown option -e inside '-verbose', did you mean '--verbose'?"
+    end
+  end
 end
 

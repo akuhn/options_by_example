@@ -34,6 +34,8 @@ class OptionsByExample
       end
 
       find_help_option
+
+      expand_combined_shorthand_options
       find_unknown_options
       parse_options
 
@@ -53,6 +55,33 @@ class OptionsByExample
           raise PrintUsageMessage
         end
       end
+    end
+
+    def expand_combined_shorthand_options
+
+      # Expands any combined shorthand options like -svt into their
+      # separate components (-s, -v, and -t). If an unknown shorthand
+      # option is found, it raises a helpful error message.
+
+      expanded_chunks = []
+      @chunks.each do |option, *args|
+        if option =~ /^-([a-zA-Z]{2,})$/
+          shorthands = $1.each_char.map { |char| "-#{char}" }
+
+          shorthands.each do |each|
+            if not @option_names.include?(each)
+              raise "Found unknown option #{each} inside '#{option}'#{", did you mean '-#{option}'?" if @option_names.include?("-#{option}")}"
+            end
+          end
+
+          expanded_chunks.concat shorthands.map { |each| [each] }
+          expanded_chunks.last.concat args
+        else
+          expanded_chunks << [option, *args]
+        end
+      end
+
+      @chunks = expanded_chunks
     end
 
     def find_unknown_options
