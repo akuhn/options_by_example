@@ -33,8 +33,9 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 1.9.3"
 
   if spec.respond_to? :metadata
-    spec.metadata["homepage_uri"] = spec.homepage
-    spec.metadata["source_code_uri"] = "https://github.com/akuhn/options_by_example"
+    spec.metadata['homepage_uri'] = spec.homepage
+    spec.metadata['source_code_uri'] = "https://github.com/akuhn/options_by_example"
+    spec.metadata['changelog_uri'] = "https://github.com/akuhn/options_by_example/blob/master/lib/options_by_example/version.rb"
   end
 
   spec.require_paths = ["lib"]
