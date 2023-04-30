@@ -7,6 +7,16 @@ describe OptionsByExample do
     expect(OptionsByExample::VERSION).not_to be nil
   end
 
+  it 'reads and parses options from DATA and ARGV' do
+    ARGV.clear.concat %w{--secure example.com 443}
+    DATA = StringIO.new usage_message
+    Options = OptionsByExample.read(DATA).parse(ARGV)
+
+    expect(Options.include_secure?).to be true
+    expect(Options.argument_host).to eq 'example.com'
+    expect(Options.argument_port).to eq '443'
+  end
+
   let(:usage_message) {
     %{
       Establishes network connection to designated host and port, enabling
@@ -31,17 +41,6 @@ describe OptionsByExample do
     OptionsByExample.new(usage_message)
   }
 
-
-  it 'reads and parses options from DATA and ARGV' do
-    ARGV.clear.concat %w{--secure example.com 80}
-    DATA = StringIO.new usage_message
-    Options = OptionsByExample.read(DATA).parse(ARGV)
-
-    expect(Options.include_secure?).to be true
-    expect(Options.argument_host).to eq 'example.com'
-    expect(Options.argument_port).to eq '80'
-  end
-
   describe "#initialize" do
 
     it 'parses optional argument names' do
@@ -53,12 +52,57 @@ describe OptionsByExample do
     end
 
     it 'parses option names' do
-      expect((this.instance_variable_get :@option_names).keys).to match_array %w{
-        -s --secure
-        -v --verbose
-        -r --retries
-        -t --timeout
+      expect(this.instance_variable_get :@option_names).to include *%w{
+         -r -s -t -v --retries --secure --timeout --verbose
       }
+    end
+  end
+
+  describe "accessor methods" do
+
+    before {
+      this.parse_without_exit %w{-v --retries 5 example.com 80}
+    }
+
+    it 'responds to positional arguments' do
+      expect(this).to respond_to :argument_mode
+      expect(this).to respond_to :argument_port
+      expect(this).to respond_to :argument_host
+    end
+
+    it 'responds to options' do
+      expect(this).to respond_to :include_verbose?
+      expect(this).to respond_to :include_secure?
+    end
+
+    it 'responds to options with arguments' do
+      expect(this).to respond_to :include_retries?
+      expect(this).to respond_to :include_timeout?
+      expect(this).to respond_to :argument_retries
+      expect(this).to respond_to :argument_timeout
+    end
+
+    it 'returns positional argument values' do
+      expect(this.argument_mode).to be_nil
+      expect(this.argument_host).to eq "example.com"
+      expect(this.argument_port).to eq "80"
+    end
+
+    it 'returns optional argument values' do
+      expect(this.argument_retries).to eq "5"
+      expect(this.argument_timeout).to be_nil
+    end
+
+    it 'returns option status when called with include_NAME? method' do
+      expect(this.include_verbose?).to be true
+      expect(this.include_retries?).to be true
+      expect(this.include_secure?).to be_falsey
+      expect(this.include_timeout?).to be_falsey
+    end
+
+    it 'passes arguments through block' do
+      expect(this.argument_retries { |val| val * 3 }).to eq "555"
+      expect(this.argument_timeout { |val| val * 3 }).to be_nil
     end
   end
 
@@ -105,28 +149,6 @@ describe OptionsByExample do
       expect {
         this.parse_without_exit %w{active example.com 80 gibberish}
       }.to raise_error "Expected 2-3 arguments, but received too many"
-    end
-  end
-
-  describe "#method_missing" do
-
-    before {
-      this.parse_without_exit %w{--secure -v --retries 5 active example.com 80}
-    }
-
-    it 'returns argument value when called with argument_NAME method' do
-      expect(this.argument_mode).to eq "active"
-      expect(this.argument_host).to eq "example.com"
-      expect(this.argument_port).to eq "80"
-      expect(this.argument_retries).to eq "5"
-      expect(this.argument_timeout).to be_nil
-    end
-
-    it 'returns option status when called with include_NAME? method' do
-      expect(this.include_secure?).to be true
-      expect(this.include_verbose?).to be true
-      expect(this.include_retries?).to be true
-      expect(this.include_timeout?).to be_falsey
     end
   end
 
