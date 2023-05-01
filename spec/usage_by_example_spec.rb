@@ -28,7 +28,7 @@ describe OptionsByExample do
         -s, --secure        Establish a secure connection (SSL/TSL)
         -v, --verbose       Enable verbose output for detailed information
         -r, --retries NUM   Number of connection retries (default 3)
-        -t, --timeout NUM   Connection timeout in seconds (default 10)
+        -t, --timeout NUM   Set connection timeout in seconds
 
       Arguments:
         [mode]              Optional connection mode (active or passive)
@@ -259,7 +259,7 @@ describe OptionsByExample do
   describe '#expand_combined_shorthand_options' do
 
     it 'parses combined shorthand options' do
-      this.parse_without_exit %w{-svt 60 example 443}
+      this.parse_without_exit %w{-svt 60 example.com 443}
 
       expect(this.include_secure?).to be true
       expect(this.include_verbose?).to be true
@@ -270,14 +270,37 @@ describe OptionsByExample do
 
     it 'raises an error for unknown shorthands' do
       expect {
-        this.parse_without_exit %w{-vrbs example 443}
+        this.parse_without_exit %w{-vrbs example.com 443}
       }.to raise_error "Found unknown option -b inside '-vrbs'"
     end
 
     it 'raises an error for unknown shorthands that match longhand' do
       expect {
-        this.parse_without_exit %w{-verbose example 443}
+        this.parse_without_exit %w{-verbose example.com 443}
       }.to raise_error "Found unknown option -e inside '-verbose', did you mean '--verbose'?"
+    end
+  end
+
+  describe '#set_default_values' do
+
+    it 'uses default value' do
+      this.parse_without_exit %w{-v example.com 80}
+
+      expect(this.include_retries?).to be_falsey
+      expect(this.argument_retries).to eq '3'
+    end
+
+    it 'uses value given on command-line' do
+      this.parse_without_exit %w{--retries 5 -v example.com 80}
+
+      expect(this.include_retries?).to be true
+      expect(this.argument_retries).to eq '5'
+    end
+
+    it 'raises an error for missing argument on command-line' do
+      expect {
+        this.parse_without_exit %w{--retries -v example.com 80}
+      }.to raise_error "Expected argument for option '--retries', got none"
     end
   end
 end

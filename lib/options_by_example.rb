@@ -37,12 +37,15 @@ class OptionsByExample
     #   -s, --secure        Use secure connection
     #   -v, --verbose       Enable verbose output
     #   -r, --retries NUM   Number of connection retries (default 3)
-    #   -t, --timeout NUM   Connection timeout in seconds (default 10)
+    #   -t, --timeout NUM   Set connection timeout in seconds
 
     @option_names = {}
-    text.scan(/((--?\w+)(, --?\w+)*) ?(\w+)?/) do
-      opts = $1.split(", ")
-      opts.each { |each| @option_names[each] = [opts.last.tr('-', ''), $4] }
+    @default_values = {}
+    text.scan(/(--\w+|-\w, --\w+)(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
+      flags = $1.split(", ")
+      option_name = flags.last.tr('-', '')
+      flags.each { |each| @option_names[each] = [option_name, $2] }
+      @default_values[option_name] = $3 if $3
     end
 
     initialize_argument_accessors
@@ -63,6 +66,7 @@ class OptionsByExample
     parser = Parser.new(
       @argument_names_required,
       @argument_names_optional,
+      @default_values,
       @option_names,
     )
 

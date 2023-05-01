@@ -14,6 +14,8 @@ __END__
 2.1.0-beta
 
   - Expand combined shorthand options into their separate components
+  - Shorthand options must be single letter only
+  - Support options with default values
 
 2.0.0
 

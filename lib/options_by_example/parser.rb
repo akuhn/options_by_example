@@ -11,12 +11,13 @@ class OptionsByExample
     attr_reader :options
     attr_reader :arguments
 
-    def initialize(argument_names_required, argument_names_optional, option_names)
+    def initialize(argument_names_required, argument_names_optional, default_values, option_names)
       @argument_names_required = argument_names_required
       @argument_names_optional = argument_names_optional
+      @default_values = default_values
       @option_names = option_names
 
-      @arguments = {}
+      @arguments = @default_values.dup
       @options = {}
     end
 
@@ -34,7 +35,6 @@ class OptionsByExample
       end
 
       find_help_option
-
       expand_combined_shorthand_options
       find_unknown_options
       parse_options
