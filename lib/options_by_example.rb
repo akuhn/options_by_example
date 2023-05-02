@@ -23,10 +23,10 @@ class OptionsByExample
     #
     # Usage: connect [options] [mode] host port
 
-    text =~ /Usage: (\w+|\$0)( \[options\])?(( \[\w+\])*)(( \w+)*)/
+    text =~ /Usage: (\$0|\w+)(?: \[options\])?((?: \[\w+\])*)((?: \w+)*)/
     raise RuntimeError, "Expected usage string, got none" unless $1
-    @argument_names_optional = $3.to_s.split.map { |match| match.tr('[]', '').downcase }
-    @argument_names_required = $5.to_s.split.map(&:downcase)
+    @argument_names_optional = $2.to_s.split.map { |match| match.tr('[]', '').downcase }
+    @argument_names_required = $3.to_s.split.map(&:downcase)
 
     # --- 2) Parse option names ---------------------------------------
     #

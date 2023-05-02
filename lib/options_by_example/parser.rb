@@ -24,7 +24,7 @@ class OptionsByExample
     def parse(array)
 
       # Separate command-line options and their respective arguments into
-      # chunks plus handling any remaining arguments. This organization
+      # chunks, plus tracking leading excess arguments. This organization
       # facilitates further processing and validation of the input.
 
       @chunks = []
@@ -35,7 +35,7 @@ class OptionsByExample
       end
 
       detect_help_option
-      expand_combined_shorthand_options
+      flatten_stacked_shorthand_options
       detect_unknown_options
       parse_options
 
@@ -57,31 +57,33 @@ class OptionsByExample
       end
     end
 
-    def expand_combined_shorthand_options
+    def flatten_stacked_shorthand_options
 
-      # Expands any combined shorthand options like -svt into their
-      # separate components (-s, -v, and -t). If an unknown shorthand
-      # option is found, it raises a helpful error message.
+      # Expand any combined shorthand options like -svt into their
+      # separate components (-s, -v, and -t) and assigns any arguments
+      # to the last component. If an unknown shorthand is found, raise
+      # a helpful error message with suggestion if possible.
 
-      expanded_chunks = []
+      list = []
       @chunks.each do |option, *args|
         if option =~ /^-([a-zA-Z]{2,})$/
           shorthands = $1.each_char.map { |char| "-#{char}" }
 
           shorthands.each do |each|
             if not @option_names.include?(each)
-              raise "Found unknown option #{each} inside '#{option}'#{", did you mean '-#{option}'?" if @option_names.include?("-#{option}")}"
+              did_you_mean = ", did you mean '-#{option}'?" if @option_names.include?("-#{option}")
+              raise "Found unknown option #{each} inside '#{option}'#{did_you_mean}"
             end
           end
 
-          expanded_chunks.concat shorthands.map { |each| [each] }
-          expanded_chunks.last.concat args
+          list.concat shorthands.map { |each| [each] }
+          list.last.concat args
         else
-          expanded_chunks << [option, *args]
+          list << [option, *args]
         end
       end
 
-      @chunks = expanded_chunks
+      @chunks = list
     end
 
     def detect_unknown_options

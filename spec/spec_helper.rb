@@ -2,6 +2,13 @@
 
 require 'options_by_example'
 
+class Binding
+  def pry
+    require 'pry'
+    super
+  end
+end
+
 RSpec.configure do |config|
   config.example_status_persistence_file_path = ".rspec_status"
 

@@ -27,8 +27,8 @@ describe OptionsByExample do
       Options:
         -s, --secure        Establish a secure connection (SSL/TSL)
         -v, --verbose       Enable verbose output for detailed information
-        -r, --retries NUM   Number of connection retries (default 3)
-        -t, --timeout NUM   Set connection timeout in seconds
+        -r, --retries ARG   Number of connection retries (default 3)
+        -t, --timeout ARG   Set connection timeout in seconds
 
       Arguments:
         [mode]              Optional connection mode (active or passive)
@@ -168,7 +168,7 @@ describe OptionsByExample do
 
   describe "parsing options only" do
 
-    let(:this) { OptionsByExample.new(%{Usage: $0 [--foo] [--bar NUM]}) }
+    let(:this) { OptionsByExample.new(%{Usage: $0 [--foo] [--bar ARG]}) }
 
     it 'parses empty command-line' do
       this.parse_without_exit %w{}
