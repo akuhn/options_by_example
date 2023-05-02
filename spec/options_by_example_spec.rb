@@ -334,5 +334,39 @@ describe OptionsByExample do
       }.to raise_error "Expected argument for option '--retries', got none"
     end
   end
+
+  describe 'argument coercion' do
+
+    let(:this) {
+      OptionsByExample.new(%{Usage: $0 [--num NUM] [--date DATE] [--time TIME]})
+    }
+
+    it 'parses integer values' do
+      this.parse_without_exit %w{--num 60}
+
+      expect(this.include_num?).to be true
+      expect(this.argument_num).to eq 60
+    end
+
+    it 'parses dates' do
+      this.parse_without_exit %w{--date 1983-09-12}
+
+      expect(this.include_date?).to be true
+      expect(this.argument_date).to be_a Date
+    end
+
+    it 'parses timestamps' do
+      this.parse_without_exit %w{--time 14:41}
+
+      expect(this.include_time?).to be true
+      expect(this.argument_time).to be_a Time
+    end
+
+    it 'raises a helpful error for invalid arguments' do
+      expect {
+        this.parse_without_exit %w{--num foo}
+      }.to raise_error "Invalid argument \"foo\" for option '--num', please provide an integer value"
+    end
+  end
 end
 

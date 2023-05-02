@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'date'
+require 'time'
+
 
 class OptionsByExample
 
@@ -103,7 +106,25 @@ class OptionsByExample
 
         if argument_name
           raise "Expected argument for option '#{option}', got none" if args.empty?
-          @arguments[option_name] = args.shift
+          value = args.shift
+
+          begin
+            case argument_name
+            when 'NUM'
+              expected_type = 'an integer value'
+              value = Integer value
+            when 'DATE'
+              expected_type = 'a date (e.g. YYYY-MM-DD)'
+              value = Date.parse value
+            when 'TIME'
+              expected_type = 'a timestamp (e.g. HH:MM:SS)'
+              value = Time.parse value
+            end
+          rescue ArgumentError
+            raise "Invalid argument \"#{value}\" for option '#{option}', please provide #{expected_type}"
+          end
+
+          @arguments[option_name] = value
           @option_took_argument = option
         else
           @option_took_argument = nil
