@@ -34,9 +34,9 @@ class OptionsByExample
         current << each
       end
 
-      find_help_option
+      detect_help_option
       expand_combined_shorthand_options
-      find_unknown_options
+      detect_unknown_options
       parse_options
 
       validate_number_of_arguments
@@ -48,7 +48,7 @@ class OptionsByExample
 
     private
 
-    def find_help_option
+    def detect_help_option
       @chunks.each do |option, *args|
         case option
         when '-h', '--help'
@@ -84,7 +84,7 @@ class OptionsByExample
       @chunks = expanded_chunks
     end
 
-    def find_unknown_options
+    def detect_unknown_options
       @chunks.each do |option, *args|
         raise "Found unknown option '#{option}'" unless @option_names.include?(option)
       end
@@ -102,6 +102,9 @@ class OptionsByExample
         if argument_name
           raise "Expected argument for option '#{option}', got none" if args.empty?
           @arguments[option_name] = args.shift
+          @option_took_argument = option
+        else
+          @option_took_argument = nil
         end
 
         @remainder = args
@@ -111,9 +114,16 @@ class OptionsByExample
     def validate_number_of_arguments
       min_length = @argument_names_required.size
       max_length = @argument_names_optional.size + min_length
+
       if @remainder.size > max_length
         range = [min_length, max_length].uniq.join(?-)
         raise "Expected #{range} arguments, but received too many"
+      end
+
+      if @remainder.size < min_length
+        too_few = @remainder.empty? ? 'none' : (@remainder.size == 1 ? 'only one' : 'too few')
+        remark = " (considering #{@option_took_argument} takes an argument)" if @option_took_argument
+        raise "Expected #{min_length} required arguments, but received #{too_few}#{remark}"
       end
     end
 
