@@ -9,6 +9,19 @@ Features
 - Parses those arguments and options from the command line (ARGV)
 - Raises errors for unknown options or missing required arguments
 
+Installation
+
+To use options_by_example, first install the gem by running:
+
+```
+gem install options_by_example
+```
+
+Alternatively, add this line to your Gemfile and run bundle install:
+
+```
+gem 'options_by_example'
+```
 
 Example
 
