@@ -19,10 +19,10 @@ describe OptionsByExample do
 
   it 'supports one-line usage messages' do
     usage = 'Usage: $0 [-v,--verbose] [-i,--interactive]'
-    Options = OptionsByExample.new(usage).parse(%w{-v})
+    this = OptionsByExample.new(usage).parse(%w{-v})
 
-    expect(Options.include_verbose?).to be true
-    expect(Options.include_interactive?).to be false
+    expect(this.include_verbose?).to be true
+    expect(this.include_interactive?).to be false
   end
 
   let(:usage_message) {
@@ -90,6 +90,15 @@ describe OptionsByExample do
       expect(this).to respond_to :include_timeout?
       expect(this).to respond_to :argument_retries
       expect(this).to respond_to :argument_timeout
+    end
+
+    it 'supports dash in option names' do
+      usage = 'Usage: $0 [--find-matches] [--enable-feature NAME]'
+      this = OptionsByExample.new(usage)
+
+      expect(this).to respond_to :include_find_matches?
+      expect(this).to respond_to :include_enable_feature?
+      expect(this).to respond_to :argument_enable_feature
     end
   end
 

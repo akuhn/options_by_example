@@ -41,7 +41,7 @@ class OptionsByExample
 
     @option_names = {}
     @default_values = {}
-    text.scan(/(?:(-\w), ?)?(--(\w+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
+    text.scan(/(?:(-\w), ?)?(--([\w-]+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
       flags = [$1, $2].compact
       flags.each { |each| @option_names[each] = [$3, $4] }
       @default_values[$3] = $5 if $5
@@ -85,7 +85,7 @@ class OptionsByExample
       *@option_names.values.select(&:last).map(&:first),
     ].each do |argument_name|
       instance_eval %{
-        def argument_#{argument_name}
+        def argument_#{argument_name.tr ?-, ?_}
           val = @arguments["#{argument_name}"]
           val && block_given? ? (yield val) : val
         end
@@ -96,7 +96,7 @@ class OptionsByExample
   def initialize_option_accessors
     @option_names.each_value do |option_name, _|
       instance_eval %{
-        def include_#{option_name}?
+        def include_#{option_name.tr ?-, ?_}?
           @options.include? "#{option_name}"
         end
       }
