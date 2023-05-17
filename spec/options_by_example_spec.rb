@@ -17,6 +17,14 @@ describe OptionsByExample do
     expect(Options.argument_port).to eq '443'
   end
 
+  it 'supports one-line usage messages' do
+    usage = 'Usage: $0 [-v,--verbose] [-i,--interactive]'
+    Options = OptionsByExample.new(usage).parse(%w{-v})
+
+    expect(Options.include_verbose?).to be true
+    expect(Options.include_interactive?).to be false
+  end
+
   let(:usage_message) {
     %{
       Establishes network connection to designated host and port, enabling
@@ -49,10 +57,18 @@ describe OptionsByExample do
       expect(this.instance_variable_get :@argument_names_required).to eq %w{host port}
     end
 
-    it 'parses option names' do
-      expect(this.instance_variable_get :@option_names).to include *%w{
-         -r -s -t -v --retries --secure --timeout --verbose
-      }
+    it 'parses all options' do
+      option_names = this.instance_variable_get :@option_names
+      expect(option_names['-v']).to eq ['verbose', nil]
+      expect(option_names['--verbose']).to eq ['verbose', nil]
+      expect(option_names['--retries']).to eq ['retries', "ARG"]
+      expect(option_names.size).to be 8
+    end
+
+    it 'parses default values' do
+      default_values = this.instance_variable_get :@default_values
+      expect(default_values['retries']).to eq "3"
+      expect(default_values.size).to be 1
     end
   end
 

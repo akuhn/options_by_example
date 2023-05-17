@@ -41,11 +41,10 @@ class OptionsByExample
 
     @option_names = {}
     @default_values = {}
-    text.scan(/(--\w+|-\w, --\w+)(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
-      flags = $1.split(", ")
-      option_name = flags.last.tr('-', '')
-      flags.each { |each| @option_names[each] = [option_name, $2] }
-      @default_values[option_name] = $3 if $3
+    text.scan(/(?:(-\w), ?)?(--(\w+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
+      flags = [$1, $2].compact
+      flags.each { |each| @option_names[each] = [$3, $4] }
+      @default_values[$3] = $5 if $5
     end
 
     initialize_argument_accessors

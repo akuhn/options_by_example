@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '2.1.0-beta'
+  VERSION = '3.0.0'
 end
 
 
@@ -11,11 +11,12 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
-2.1.0-beta
+3.0.0
 
+  - Support options with default values
+  - Improved support for one-line usage messages
   - Expand combined shorthand options into their separate components
   - Shorthand options must be single letter only
-  - Support options with default values
 
 2.0.0
 
