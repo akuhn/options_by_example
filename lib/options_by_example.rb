@@ -25,8 +25,8 @@ class OptionsByExample
 
     text =~ /Usage: (\$0|\w+)(?: \[options\])?((?: \[\w+\])*)((?: \w+)*)/
     raise RuntimeError, "Expected usage string, got none" unless $1
-    @argument_names_optional = $2.to_s.split.map { |match| match.tr('[]', '').downcase }
-    @argument_names_required = $3.to_s.split.map(&:downcase)
+    @argument_names_optional = $2.to_s.split.map { |match| sanitize match.tr('[]', '') }
+    @argument_names_required = $3.to_s.split.map { |match| sanitize match }
 
     # --- 2) Parse option names ---------------------------------------
     #
@@ -41,10 +41,10 @@ class OptionsByExample
 
     @option_names = {}
     @default_values = {}
-    text.scan(/(?:(-\w), ?)?(--(\w+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
+    text.scan(/(?:(-\w), ?)?(--([\w-]+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
       flags = [$1, $2].compact
-      flags.each { |each| @option_names[each] = [$3, $4] }
-      @default_values[$3] = $5 if $5
+      flags.each { |each| @option_names[each] = [(sanitize $3), $4] }
+      @default_values[sanitize $3] = $5 if $5
     end
 
     initialize_argument_accessors
@@ -86,7 +86,7 @@ class OptionsByExample
     ].each do |argument_name|
       instance_eval %{
         def argument_#{argument_name}
-          val = @arguments["#{argument_name}"]
+          val = @arguments[:#{argument_name}]
           val && block_given? ? (yield val) : val
         end
       }
@@ -97,10 +97,14 @@ class OptionsByExample
     @option_names.each_value do |option_name, _|
       instance_eval %{
         def include_#{option_name}?
-          @options.include? "#{option_name}"
+          @options.include? :#{option_name}
         end
       }
     end
+  end
+
+  def sanitize(string)
+    string.tr('^a-zA-Z0-9', '_').downcase.to_sym
   end
 end
 

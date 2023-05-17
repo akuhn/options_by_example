@@ -19,10 +19,10 @@ describe OptionsByExample do
 
   it 'supports one-line usage messages' do
     usage = 'Usage: $0 [-v,--verbose] [-i,--interactive]'
-    Options = OptionsByExample.new(usage).parse(%w{-v})
+    this = OptionsByExample.new(usage).parse(%w{-v})
 
-    expect(Options.include_verbose?).to be true
-    expect(Options.include_interactive?).to be false
+    expect(this.include_verbose?).to be true
+    expect(this.include_interactive?).to be false
   end
 
   let(:usage_message) {
@@ -50,24 +50,24 @@ describe OptionsByExample do
   describe "#initialize" do
 
     it 'parses optional argument names' do
-      expect(this.instance_variable_get :@argument_names_optional).to eq %w{mode}
+      expect(this.instance_variable_get :@argument_names_optional).to eq [:mode]
     end
 
     it 'parses required argument names' do
-      expect(this.instance_variable_get :@argument_names_required).to eq %w{host port}
+      expect(this.instance_variable_get :@argument_names_required).to eq [:host, :port]
     end
 
     it 'parses all options' do
       option_names = this.instance_variable_get :@option_names
-      expect(option_names['-v']).to eq ['verbose', nil]
-      expect(option_names['--verbose']).to eq ['verbose', nil]
-      expect(option_names['--retries']).to eq ['retries', "ARG"]
+      expect(option_names['-v']).to eq [:verbose, nil]
+      expect(option_names['--verbose']).to eq [:verbose, nil]
+      expect(option_names['--retries']).to eq [:retries, "ARG"]
       expect(option_names.size).to be 8
     end
 
     it 'parses default values' do
       default_values = this.instance_variable_get :@default_values
-      expect(default_values['retries']).to eq "3"
+      expect(default_values[:retries]).to eq "3"
       expect(default_values.size).to be 1
     end
   end
@@ -90,6 +90,22 @@ describe OptionsByExample do
       expect(this).to respond_to :include_timeout?
       expect(this).to respond_to :argument_retries
       expect(this).to respond_to :argument_timeout
+    end
+
+    it 'supports dash in option names' do
+      usage = 'Usage: $0 [--find-matches] [--enable-feature NAME]'
+      this = OptionsByExample.new(usage)
+
+      expect(this).to respond_to :include_find_matches?
+      expect(this).to respond_to :include_enable_feature?
+      expect(this).to respond_to :argument_enable_feature
+    end
+
+    it 'supports dash in argument names' do
+      usage = 'Usage: $0 [options] BLOCK_NUMBER'
+      this = OptionsByExample.new(usage)
+
+      expect(this).to respond_to :argument_block_number
     end
   end
 
@@ -135,8 +151,8 @@ describe OptionsByExample do
     it 'parses options and arguments correctly' do
       this.parse_without_exit %w{--secure -v --retries 5 active example.com 80}
 
-      expect(this.options.keys).to match_array %w{secure verbose retries}
-      expect(this.arguments.keys).to match_array %w{retries mode host port}
+      expect(this.options.keys).to match_array [:secure, :verbose, :retries]
+      expect(this.arguments.keys).to match_array [:retries, :mode, :host, :port]
     end
 
     it 'raises an error for unknown options' do
@@ -196,15 +212,15 @@ describe OptionsByExample do
     it 'parses both options' do
       this.parse_without_exit %w{--foo --bar 5309}
 
-      expect(this.options.keys).to match_array %w{foo bar}
-      expect(this.arguments.keys).to match_array %w{bar}
-      expect(this.arguments['bar']).to eq '5309'
+      expect(this.options.keys).to match_array [:foo, :bar]
+      expect(this.arguments.keys).to match_array [:bar]
+      expect(this.arguments[:bar]).to eq '5309'
     end
 
     it 'parses one option' do
       this.parse_without_exit %w{--foo}
 
-      expect(this.options.keys).to match_array %w{foo}
+      expect(this.options.keys).to match_array [:foo]
       expect(this.arguments).to be_empty
     end
 
@@ -253,7 +269,7 @@ describe OptionsByExample do
       this.parse_without_exit %w{80 443}
 
       expect(this.options.keys).to be_empty
-      expect(this.arguments.keys).to match_array %w{source dest}
+      expect(this.arguments.keys).to match_array [:source, :dest]
     end
 
     it 'parses help option' do
