@@ -393,5 +393,58 @@ describe OptionsByExample do
       }.to raise_error "Invalid argument \"foo\" for option '--num', please provide an integer value"
     end
   end
+
+  describe '#parse_and_extend' do
+
+    before(:each) do
+      data = StringIO.new usage_message
+      ARGV.clear.concat %w{--secure example.com 443}
+      OptionsByExample.read(data).parse_and_extend(ARGV)
+    end
+
+    it 'parses options and extends ARGV with symbols' do
+      expect(ARGV.include? :secure).to be true
+      expect(ARGV[:host]).to eq 'example.com'
+      expect(ARGV[:port]).to eq '443'
+    end
+
+    it 'returns default value for arguments' do
+      expect(ARGV[:retries]).to eq "3"
+    end
+
+    it 'returns nil for missing arguments' do
+      expect(ARGV[:timeout]).to be nil
+    end
+
+    it 'returns nil for unknown arguments' do
+      expect(ARGV[:unknwon_argument_name]).to be nil
+    end
+
+    it 'returns true for present options' do
+      expect(ARGV.include? :secure).to be true
+    end
+
+    it 'returns false for missing options' do
+      expect(ARGV.include? :verbose).to be_falsey
+    end
+
+    it 'returns false for unknown options' do
+      expect(ARGV.include? :unknwon_option_name).to be_falsey
+    end
+
+    it 'does not actually add array elements' do
+      expect(ARGV.length).to eq 3
+      expect(ARGV).to eq %w{--secure example.com 443}
+    end
+
+    it 'does not break default functionality' do
+      expect(ARGV.include?('--secure')).to be true
+      expect(ARGV.include?(9000)).to be false
+
+      expect(ARGV[0]).to eq '--secure'
+      expect(ARGV[1, 2]).to eq %w{example.com 443}
+      expect { ARGV['foo'] }.to raise_error TypeError
+    end
+  end
 end
 

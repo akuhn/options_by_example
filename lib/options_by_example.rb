@@ -76,6 +76,29 @@ class OptionsByExample
     return self
   end
 
+  def parse_and_extend(argv)
+    parse argv
+
+    hash = {}
+    @options.each { |k, v| hash[k.to_sym] = v }
+    @arguments.each { |k, v| hash[k.to_sym] = v }
+
+    ARGV.instance_variable_set :@options_by_example, hash
+    ARGV.extend Extension
+
+    return self
+  end
+
+  module Extension
+    def include?(arg)
+      @options_by_example.include?(arg) or super
+    end
+
+    def [](arg, *args)
+      Symbol === arg ? @options_by_example[arg] : super
+    end
+  end
+
   private
 
   def initialize_argument_accessors

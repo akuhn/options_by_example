@@ -14,6 +14,8 @@ __END__
 3.1.0-bis
 
   - Support dash in option names
+  - Added new parse function that extends ARGV with symbols
+  - Extends ARGV with custom include? and [] methods
 
 3.0.0
 
@@ -24,8 +26,8 @@ __END__
 
 2.0.0
 
-  - Replaced dynamic methods with explicit methods for options and arguments
-  - Removed ability to call dynamic methods with undeclared names
+  - Replaced method_missing with custom methods for options and arguments
+  - Removed ability to call custom methods with undeclared names
 
 1.3.0
 
