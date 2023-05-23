@@ -8,13 +8,22 @@ describe OptionsByExample do
   end
 
   it 'reads and parses options from DATA and ARGV' do
-    ARGV.clear.concat %w{--secure example.com 443}
     DATA = StringIO.new usage_message
+    ARGV.clear.concat %w{--secure example.com 443}
     Options = OptionsByExample.read(DATA).parse(ARGV)
 
     expect(Options.include_secure?).to be true
     expect(Options.argument_host).to eq 'example.com'
     expect(Options.argument_port).to eq '443'
+  end
+
+  it 'parses options and extends ARGV with symbols' do
+    ARGV.clear.concat %w{--secure example.com 443}
+    OptionsByExample.new(usage_message).parse_and_extend(ARGV)
+
+    expect(ARGV.include? :secure).to be true
+    expect(ARGV[:host]).to eq 'example.com'
+    expect(ARGV[:port]).to eq '443'
   end
 
   it 'supports one-line usage messages' do
@@ -396,54 +405,58 @@ describe OptionsByExample do
 
   describe '#parse_and_extend' do
 
-    before(:each) do
-      data = StringIO.new usage_message
-      ARGV.clear.concat %w{--secure example.com 443}
-      OptionsByExample.read(data).parse_and_extend(ARGV)
-    end
+    let(:argv) { %w{--secure example.com 443} }
 
-    it 'parses options and extends ARGV with symbols' do
-      expect(ARGV.include? :secure).to be true
-      expect(ARGV[:host]).to eq 'example.com'
-      expect(ARGV[:port]).to eq '443'
+    before(:each) do
+      OptionsByExample.new(usage_message).parse_and_extend(argv)
     end
 
     it 'returns default value for arguments' do
-      expect(ARGV[:retries]).to eq "3"
+      expect(argv[:retries]).to eq "3"
     end
 
     it 'returns nil for missing arguments' do
-      expect(ARGV[:timeout]).to be nil
+      expect(argv[:timeout]).to be nil
     end
 
     it 'returns nil for unknown arguments' do
-      expect(ARGV[:unknwon_argument_name]).to be nil
+      expect(argv[:unknwon_argument_name]).to be nil
     end
 
     it 'returns true for present options' do
-      expect(ARGV.include? :secure).to be true
+      expect(argv.include? :secure).to be true
     end
 
     it 'returns false for missing options' do
-      expect(ARGV.include? :verbose).to be_falsey
+      expect(argv.include? :verbose).to be_falsey
     end
 
     it 'returns false for unknown options' do
-      expect(ARGV.include? :unknwon_option_name).to be_falsey
+      expect(argv.include? :unknwon_option_name).to be_falsey
     end
 
     it 'does not actually add array elements' do
-      expect(ARGV.length).to eq 3
-      expect(ARGV).to eq %w{--secure example.com 443}
+      expect(argv.length).to eq 3
+      expect(argv).to eq %w{--secure example.com 443}
+    end
+
+    it 'supports dash in option names' do
+      usage = 'Usage: $0 [--find-matches] [--enable-feature NAME]'
+      argv = %w{--find-matches --enable-feature EASTER_EGG}
+      OptionsByExample.new(usage).parse_and_extend(argv)
+
+      expect(argv.include? :find_matches).to be true
+      expect(argv.include? :enable_feature).to be true
+      expect(argv[:enable_feature]).to eq 'EASTER_EGG'
     end
 
     it 'does not break default functionality' do
-      expect(ARGV.include?('--secure')).to be true
-      expect(ARGV.include?(9000)).to be false
+      expect(argv.include?('--secure')).to be true
+      expect(argv.include?(9000)).to be false
 
-      expect(ARGV[0]).to eq '--secure'
-      expect(ARGV[1, 2]).to eq %w{example.com 443}
-      expect { ARGV['foo'] }.to raise_error TypeError
+      expect(argv[0]).to eq '--secure'
+      expect(argv[1, 2]).to eq %w{example.com 443}
+      expect { argv['foo'] }.to raise_error TypeError
     end
   end
 end

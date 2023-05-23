@@ -80,11 +80,11 @@ class OptionsByExample
     parse argv
 
     hash = {}
-    @options.each { |k, v| hash[k.to_sym] = v }
-    @arguments.each { |k, v| hash[k.to_sym] = v }
+    @options.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
+    @arguments.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
 
-    ARGV.instance_variable_set :@options_by_example, hash
-    ARGV.extend Extension
+    argv.instance_variable_set :@options_by_example, hash
+    argv.extend Extension
 
     return self
   end
