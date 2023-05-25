@@ -7,16 +7,6 @@ require 'options_by_example/version'
 
 class OptionsByExample
 
-  module Extension
-    def include?(arg)
-      @options_by_example.include?(arg) or super
-    end
-
-    def [](arg, *args)
-      Symbol === arg ? @options_by_example[arg] : super
-    end
-  end
-
   attr_reader :option_names
   attr_reader :default_values
   attr_reader :argument_names_optional
@@ -38,7 +28,7 @@ class OptionsByExample
 
     text =~ /Usage: (\$0|\w+)(?: \[options\])?((?: \[\w+\])*)((?: \w+)*)/
     raise RuntimeError, "Expected usage string, got none" unless $1
-    @argument_names_optional = $2.to_s.split.map { |match| sanitize match }
+    @argument_names_optional = $2.to_s.split.map { |match| sanitize match.tr('[]', '') }
     @argument_names_required = $3.to_s.split.map { |match| sanitize match }
 
     # --- 2) Parse option names ---------------------------------------
@@ -75,7 +65,13 @@ class OptionsByExample
   def parse_and_extend(argv)
     options = parse(argv)
 
-    # NOTE: .... todo, write note with a comment here....
+    # NOTE: This code extends ARGV to provide convenient access to parsed
+    # options in cases where the gem may not be loaded. It patches the #[]
+    # and #include? methods of ARGV respond as if it where both an array
+    # of strings (as usual) and a hash of symbolized option names mapping
+    # to their values. For example, by calling ARGV.include?(:verbose) we
+    # can safely check for the presence of the "verbose" option regardless
+    # of whether the gem has been loaded or not.
 
     argv.instance_variable_set :@options_by_example, options.to_h
     argv.extend Extension
@@ -83,10 +79,24 @@ class OptionsByExample
     return options
   end
 
+  module Extension
+    def include?(arg)
+      @options_by_example.include?(arg) or super
+    end
+
+    def [](arg, *args)
+      Symbol === arg ? @options_by_example[arg] : super
+    end
+
+    def fetch(*args, &block)
+      Symbol === arg ? @options_by_example.fetch(*args, &block) : super
+    end
+  end
+
   private
 
   def sanitize(str)
-    str.tr('[]', '').tr('-', '_').downcase.to_sym
+    str.tr('-', '_').downcase.to_sym
   end
 end
 

@@ -15,8 +15,8 @@ class OptionsByExample
       ].each do |argument_name|
         instance_eval %{
           def argument_#{argument_name}
-            val = @values[:#{argument_name}]
-            val && block_given? ? (yield val) : val
+            raise if block_given?
+            @values[:#{argument_name}]
           end
         }
       end
@@ -28,6 +28,19 @@ class OptionsByExample
           end
         }
       end
+    end
+
+    def include?(symbol)
+      @values.include? symbol
+    end
+
+    def fetch(*args, &block)
+      @values.fetch(*args, &block)
+    end
+
+    def if_present(symbol)
+      value = @values[symbol]
+      yield value if value
     end
 
     def to_h

@@ -147,8 +147,8 @@ describe OptionsByExample do
     it 'passes arguments through block' do
       this = subject.parse %w{-v --retries 5 example.com 80}
 
-      expect(this.argument_retries { |val| val * 3 }).to eq "555"
-      expect(this.argument_timeout { |val| val * 3 }).to be_nil
+      expect(this.if_present(:retries) { |val| val * 3 }).to eq "555"
+      expect(this.if_present(:timeout) { |val| val * 3 }).to be_nil
     end
   end
 
