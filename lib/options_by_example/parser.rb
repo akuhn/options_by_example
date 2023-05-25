@@ -11,9 +11,6 @@ class OptionsByExample
 
   class Parser
 
-    attr_reader :options
-    attr_reader :arguments
-
     def initialize(settings)
       @settings = settings
       @argument_names_required = settings.argument_names_required
@@ -21,8 +18,7 @@ class OptionsByExample
       @default_values = settings.default_values
       @option_names = settings.option_names
 
-      @arguments = @default_values.dup
-      @options = {}
+      @values = @default_values.dup
     end
 
     def parse(array)
@@ -49,7 +45,7 @@ class OptionsByExample
 
       raise "Internal error: unreachable state" unless @remainder.empty?
 
-      Options.new(@settings, @arguments, @options)
+      return @values
     end
 
     private
@@ -105,7 +101,7 @@ class OptionsByExample
         end
 
         option_name, argument_name = @option_names[option]
-        @options[option_name] = true
+        @values[option_name] ||= true
 
         if argument_name
           raise "Expected argument for option '#{option}', got none" if args.empty?
@@ -127,7 +123,7 @@ class OptionsByExample
             raise "Invalid argument \"#{value}\" for option '#{option}', please provide #{expected_type}"
           end
 
-          @arguments[option_name] = value
+          @values[option_name] = value
           @option_took_argument = option
         else
           @option_took_argument = nil
@@ -157,14 +153,14 @@ class OptionsByExample
       stash = @remainder.pop(@argument_names_required.length)
       @argument_names_required.each do |argument_name|
         raise "Missing required argument '#{argument_name}'" if stash.empty?
-        @arguments[argument_name] = stash.shift
+        @values[argument_name] = stash.shift
       end
     end
 
     def parse_optional_arguments
       @argument_names_optional.each do |argument_name|
         break if @remainder.empty?
-        @arguments[argument_name] = @remainder.shift
+        @values[argument_name] = @remainder.shift
       end
     end
   end

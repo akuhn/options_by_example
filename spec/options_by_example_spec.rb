@@ -118,10 +118,10 @@ describe OptionsByExample do
   describe "#include_NAME?" do
 
     it 'returns option status' do
-      this = parser.parse %w{-v --timeout 60 example.com 80}
+      this = subject.parse %w{-v --timeout 60 example.com 80}
 
       expect(this.include_verbose?).to be true
-      expect(this.include_retries?).to be_falsey
+      expect(this.include_retries?).to be true # has default value!
       expect(this.include_secure?).to be_falsey
       expect(this.include_timeout?).to be true
     end
@@ -130,7 +130,7 @@ describe OptionsByExample do
   describe "#argument_NAME" do
 
     it 'returns positional argument values' do
-      this = parser.parse %w{-v --retries 5 example.com 80}
+      this = subject.parse %w{-v --retries 5 example.com 80}
 
       expect(this.argument_mode).to be_nil
       expect(this.argument_host).to eq "example.com"
@@ -138,14 +138,14 @@ describe OptionsByExample do
     end
 
     it 'returns optional argument values' do
-      this = parser.parse %w{-v --retries 5 example.com 80}
+      this = subject.parse %w{-v --retries 5 example.com 80}
 
       expect(this.argument_retries).to eq "5"
       expect(this.argument_timeout).to be_nil
     end
 
     it 'passes arguments through block' do
-      this = parser.parse %w{-v --retries 5 example.com 80}
+      this = subject.parse %w{-v --retries 5 example.com 80}
 
       expect(this.argument_retries { |val| val * 3 }).to eq "555"
       expect(this.argument_timeout { |val| val * 3 }).to be_nil
@@ -155,10 +155,16 @@ describe OptionsByExample do
   describe "#parse" do
 
     it 'parses options and arguments correctly' do
-      this = parser.parse %w{--secure -v --retries 5 active example.com 80}
+      res = parser.parse %w{--secure -v --retries 5 active example.com 80}
 
-      expect(this.options.keys).to match_array [:secure, :verbose, :retries]
-      expect(this.arguments.keys).to match_array [:retries, :mode, :host, :port]
+      expect(res).to eq ({
+        secure: true,
+        verbose: true,
+        retries: '5',
+        mode: 'active',
+        host: 'example.com',
+        port: '80',
+      })
     end
 
     it 'raises an error for unknown options' do
@@ -209,25 +215,26 @@ describe OptionsByExample do
     let(:subject) { OptionsByExample.new(%{Usage: $0 [--foo] [--bar ARG]}) }
 
     it 'parses empty command-line' do
-      this = parser.parse %w{}
+      res = parser.parse %w{}
 
-      expect(this.options).to be_empty
-      expect(this.arguments.keys).to be_empty
+      expect(res).to be_empty
     end
 
     it 'parses both options' do
-      this = parser.parse %w{--foo --bar 5309}
+      res = parser.parse %w{--foo --bar 5309}
 
-      expect(this.options.keys).to match_array [:foo, :bar]
-      expect(this.arguments.keys).to match_array [:bar]
-      expect(this.arguments[:bar]).to eq '5309'
+      expect(res).to eq ({
+        foo: true,
+        bar: '5309',
+      })
     end
 
     it 'parses one option' do
-      this = parser.parse %w{--foo}
+      res = parser.parse %w{--foo}
 
-      expect(this.options.keys).to match_array [:foo]
-      expect(this.arguments).to be_empty
+      expect(res).to eq ({
+        foo: true,
+      })
     end
 
     it 'raises an error for unexpected arguments' do
@@ -272,10 +279,12 @@ describe OptionsByExample do
     let(:subject) { OptionsByExample.new(%{Usage: $0 source dest}) }
 
     it 'parses example arguments' do
-      this = parser.parse %w{80 443}
+      res = parser.parse %w{80 443}
 
-      expect(this.options.keys).to be_empty
-      expect(this.arguments.keys).to match_array [:source, :dest]
+      expect(res).to eq ({
+        source: '80',
+        dest: '443',
+      })
     end
 
     it 'parses help option' do
@@ -318,23 +327,21 @@ describe OptionsByExample do
   describe 'shorthand options' do
 
     it 'parses shorthand options' do
-      this = parser.parse %w{-s -v -t 60 example.com 443}
+      res = parser.parse %w{-s -v -r 12 example.com 443}
 
-      expect(this.include_secure?).to be true
-      expect(this.include_verbose?).to be true
-      expect(this.include_retries?).to be_falsey
-      expect(this.include_timeout?).to be true
-      expect(this.argument_timeout).to eq '60'
+      expect(res).to include :secure
+      expect(res).to include :verbose
+      expect(res).to include retries: '12'
+      expect(res).to_not include :timeout
     end
 
     it 'parses stacked shorthand options' do
-      this = parser.parse %w{-svt 60 example.com 443}
+      res = parser.parse %w{-svr 12 example.com 443}
 
-      expect(this.include_secure?).to be true
-      expect(this.include_verbose?).to be true
-      expect(this.include_retries?).to be_falsey
-      expect(this.include_timeout?).to be true
-      expect(this.argument_timeout).to eq '60'
+      expect(res).to include :secure
+      expect(res).to include :verbose
+      expect(res).to include retries: '12'
+      expect(res).to_not include :timeout
     end
 
     it 'raises an error for unknown stacked shorthands' do
@@ -353,17 +360,15 @@ describe OptionsByExample do
   describe 'default values' do
 
     it 'uses default value' do
-      this = parser.parse %w{-v example.com 80}
+      res = parser.parse %w{-v example.com 80}
 
-      expect(this.include_retries?).to be_falsey
-      expect(this.argument_retries).to eq '3'
+      expect(res).to include retries: '3'
     end
 
     it 'uses given value' do
-      this = parser.parse %w{--retries 5 -v example.com 80}
+      res = parser.parse %w{--retries 5 -v example.com 80}
 
-      expect(this.include_retries?).to be true
-      expect(this.argument_retries).to eq '5'
+      expect(res).to include retries: '5'
     end
 
     it 'raises an error for missing argument' do
@@ -380,24 +385,21 @@ describe OptionsByExample do
     }
 
     it 'parses integer values' do
-      this = parser.parse %w{--num 60}
+      res = parser.parse %w{--num 60}
 
-      expect(this.include_num?).to be true
-      expect(this.argument_num).to eq 60
+      expect(res).to match num: (be_a Numeric)
     end
 
     it 'parses dates' do
-      this = parser.parse %w{--date 1983-09-12}
+      res = parser.parse %w{--date 1983-09-12}
 
-      expect(this.include_date?).to be true
-      expect(this.argument_date).to be_a Date
+      expect(res).to match date: (be_a Date)
     end
 
     it 'parses timestamps' do
-      this = parser.parse %w{--time 14:41}
+      res = parser.parse %w{--time 14:41}
 
-      expect(this.include_time?).to be true
-      expect(this.argument_time).to be_a Time
+      expect(res).to match time: (be_a Time)
     end
 
     it 'raises a helpful error for invalid arguments' do

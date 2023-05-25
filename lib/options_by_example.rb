@@ -7,6 +7,16 @@ require 'options_by_example/version'
 
 class OptionsByExample
 
+  module Extension
+    def include?(arg)
+      @options_by_example.include?(arg) or super
+    end
+
+    def [](arg, *args)
+      Symbol === arg ? @options_by_example[arg] : super
+    end
+  end
+
   attr_reader :option_names
   attr_reader :default_values
   attr_reader :argument_names_optional
@@ -53,6 +63,7 @@ class OptionsByExample
 
   def parse(argv)
     values = Parser.new(self).parse(argv)
+    Options.new self, values
   rescue PrintUsageMessage
     puts @usage_message
     exit 0
@@ -62,32 +73,20 @@ class OptionsByExample
   end
 
   def parse_and_extend(argv)
-    this = parse(argv)
+    options = parse(argv)
 
-    hash = {}
-    hash.update this.options
-    hash.update this.arguments
+    # NOTE: .... todo, write note with a comment here....
 
-    argv.instance_variable_set :@options_by_example, hash
+    argv.instance_variable_set :@options_by_example, options.to_h
     argv.extend Extension
 
-    return this
+    return options
   end
 
   private
 
   def sanitize(str)
     str.tr('[]', '').tr('-', '_').downcase.to_sym
-  end
-
-  module Extension
-    def include?(arg)
-      @options_by_example.include?(arg) or super
-    end
-
-    def [](arg, *args)
-      Symbol === arg ? @options_by_example[arg] : super
-    end
   end
 end
 
