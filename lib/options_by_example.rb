@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
-require 'options_by_example/version'
+require 'options_by_example/options'
 require 'options_by_example/parser'
+require 'options_by_example/version'
 
 
 class OptionsByExample
 
-  attr_reader :arguments
-  attr_reader :options
+  attr_reader :option_names
+  attr_reader :default_values
+  attr_reader :argument_names_optional
+  attr_reader :argument_names_required
 
   def self.read(data)
     return new data.read
@@ -46,13 +49,10 @@ class OptionsByExample
       flags.each { |each| @option_names[each] = [$3, $4] }
       @default_values[$3] = $5 if $5
     end
-
-    initialize_argument_accessors
-    initialize_option_accessors
   end
 
   def parse(argv)
-    parse_without_exit argv
+    Parser.new(self).parse(argv)
   rescue PrintUsageMessage
     puts @usage_message
     exit 0
@@ -61,32 +61,17 @@ class OptionsByExample
     exit 1
   end
 
-  def parse_without_exit(argv)
-    parser = Parser.new(
-      @argument_names_required,
-      @argument_names_optional,
-      @default_values,
-      @option_names,
-    )
-
-    parser.parse argv
-    @arguments = parser.arguments
-    @options = parser.options
-
-    return self
-  end
-
   def parse_and_extend(argv)
-    parse argv
+    this = parse(argv)
 
     hash = {}
-    @options.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
-    @arguments.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
+    this.options.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
+    this.arguments.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
 
     argv.instance_variable_set :@options_by_example, hash
     argv.extend Extension
 
-    return self
+    return this
   end
 
   module Extension
@@ -96,33 +81,6 @@ class OptionsByExample
 
     def [](arg, *args)
       Symbol === arg ? @options_by_example[arg] : super
-    end
-  end
-
-  private
-
-  def initialize_argument_accessors
-    [
-      *@argument_names_required,
-      *@argument_names_optional,
-      *@option_names.values.select(&:last).map(&:first),
-    ].each do |argument_name|
-      instance_eval %{
-        def argument_#{argument_name.tr ?-, ?_}
-          val = @arguments["#{argument_name}"]
-          val && block_given? ? (yield val) : val
-        end
-      }
-    end
-  end
-
-  def initialize_option_accessors
-    @option_names.each_value do |option_name, _|
-      instance_eval %{
-        def include_#{option_name.tr ?-, ?_}?
-          @options.include? "#{option_name}"
-        end
-      }
     end
   end
 end

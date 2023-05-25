@@ -16,6 +16,7 @@ __END__
   - Support dash in option names
   - Added new parse function that extends ARGV with symbols
   - Extends ARGV with custom include? and [] methods
+  - Breaking options into separate class
 
 3.0.0
 

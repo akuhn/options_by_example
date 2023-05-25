@@ -14,11 +14,12 @@ class OptionsByExample
     attr_reader :options
     attr_reader :arguments
 
-    def initialize(argument_names_required, argument_names_optional, default_values, option_names)
-      @argument_names_required = argument_names_required
-      @argument_names_optional = argument_names_optional
-      @default_values = default_values
-      @option_names = option_names
+    def initialize(settings)
+      @settings = settings
+      @argument_names_required = settings.argument_names_required
+      @argument_names_optional = settings.argument_names_optional
+      @default_values = settings.default_values
+      @option_names = settings.option_names
 
       @arguments = @default_values.dup
       @options = {}
@@ -47,6 +48,8 @@ class OptionsByExample
       parse_optional_arguments
 
       raise "Internal error: unreachable state" unless @remainder.empty?
+
+      Options.new(@settings, @arguments, @options)
     end
 
     private
