@@ -28,8 +28,8 @@ class OptionsByExample
 
     text =~ /Usage: (\$0|\w+)(?: \[options\])?((?: \[\w+\])*)((?: \w+)*)/
     raise RuntimeError, "Expected usage string, got none" unless $1
-    @argument_names_optional = $2.to_s.split.map { |match| match.tr('[]', '').downcase }
-    @argument_names_required = $3.to_s.split.map(&:downcase)
+    @argument_names_optional = $2.to_s.split.map { |match| sanitize match }
+    @argument_names_required = $3.to_s.split.map { |match| sanitize match }
 
     # --- 2) Parse option names ---------------------------------------
     #
@@ -46,13 +46,13 @@ class OptionsByExample
     @default_values = {}
     text.scan(/(?:(-\w), ?)?(--([\w-]+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
       flags = [$1, $2].compact
-      flags.each { |each| @option_names[each] = [$3, $4] }
-      @default_values[$3] = $5 if $5
+      flags.each { |each| @option_names[each] = [(sanitize $3), $4] }
+      @default_values[sanitize $3] = $5 if $5
     end
   end
 
   def parse(argv)
-    Parser.new(self).parse(argv)
+    values = Parser.new(self).parse(argv)
   rescue PrintUsageMessage
     puts @usage_message
     exit 0
@@ -65,13 +65,19 @@ class OptionsByExample
     this = parse(argv)
 
     hash = {}
-    this.options.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
-    this.arguments.each { |k, v| hash[k.tr(?-, ?_).to_sym] = v }
+    hash.update this.options
+    hash.update this.arguments
 
     argv.instance_variable_set :@options_by_example, hash
     argv.extend Extension
 
     return this
+  end
+
+  private
+
+  def sanitize(str)
+    str.tr('[]', '').tr('-', '_').downcase.to_sym
   end
 
   module Extension

@@ -61,24 +61,24 @@ describe OptionsByExample do
   describe "#initialize" do
 
     it 'parses optional argument names' do
-      expect(subject.argument_names_optional).to eq %w{mode}
+      expect(subject.argument_names_optional).to eq [:mode]
     end
 
     it 'parses required argument names' do
-      expect(subject.argument_names_required).to eq %w{host port}
+      expect(subject.argument_names_required).to eq [:host, :port]
     end
 
     it 'parses all options' do
       option_names = subject.option_names
-      expect(option_names['-v']).to eq ['verbose', nil]
-      expect(option_names['--verbose']).to eq ['verbose', nil]
-      expect(option_names['--retries']).to eq ['retries', "ARG"]
+      expect(option_names['-v']).to eq [:verbose, nil]
+      expect(option_names['--verbose']).to eq [:verbose, nil]
+      expect(option_names['--retries']).to eq [:retries, "ARG"]
       expect(option_names.size).to be 8
     end
 
     it 'parses default values' do
       default_values = subject.default_values
-      expect(default_values['retries']).to eq "3"
+      expect(default_values[:retries]).to eq "3"
       expect(default_values.size).to be 1
     end
   end
@@ -157,8 +157,8 @@ describe OptionsByExample do
     it 'parses options and arguments correctly' do
       this = parser.parse %w{--secure -v --retries 5 active example.com 80}
 
-      expect(this.options.keys).to match_array %w{secure verbose retries}
-      expect(this.arguments.keys).to match_array %w{retries mode host port}
+      expect(this.options.keys).to match_array [:secure, :verbose, :retries]
+      expect(this.arguments.keys).to match_array [:retries, :mode, :host, :port]
     end
 
     it 'raises an error for unknown options' do
@@ -218,15 +218,15 @@ describe OptionsByExample do
     it 'parses both options' do
       this = parser.parse %w{--foo --bar 5309}
 
-      expect(this.options.keys).to match_array %w{foo bar}
-      expect(this.arguments.keys).to match_array %w{bar}
-      expect(this.arguments['bar']).to eq '5309'
+      expect(this.options.keys).to match_array [:foo, :bar]
+      expect(this.arguments.keys).to match_array [:bar]
+      expect(this.arguments[:bar]).to eq '5309'
     end
 
     it 'parses one option' do
       this = parser.parse %w{--foo}
 
-      expect(this.options.keys).to match_array %w{foo}
+      expect(this.options.keys).to match_array [:foo]
       expect(this.arguments).to be_empty
     end
 
@@ -275,7 +275,7 @@ describe OptionsByExample do
       this = parser.parse %w{80 443}
 
       expect(this.options.keys).to be_empty
-      expect(this.arguments.keys).to match_array %w{source dest}
+      expect(this.arguments.keys).to match_array [:source, :dest]
     end
 
     it 'parses help option' do

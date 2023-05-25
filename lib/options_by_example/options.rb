@@ -18,8 +18,8 @@ class OptionsByExample
         *settings.option_names.values.select(&:last).map(&:first),
       ].each do |argument_name|
         instance_eval %{
-          def argument_#{argument_name.tr ?-, ?_}
-            val = @arguments["#{argument_name}"]
+          def argument_#{argument_name}
+            val = @arguments[:#{argument_name}]
             val && block_given? ? (yield val) : val
           end
         }
@@ -27,8 +27,8 @@ class OptionsByExample
 
       settings.option_names.each_value do |option_name, _|
         instance_eval %{
-          def include_#{option_name.tr ?-, ?_}?
-            @options.include? "#{option_name}"
+          def include_#{option_name}?
+            @options.include? :#{option_name}
           end
         }
       end
