@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '3.1.0-bis'
+  VERSION = '3.1.0'
 end
 
 
@@ -11,7 +11,7 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
-3.1.0-bis
+3.1.0
 
   - Support dash in argument and option names
   - Method #if_present passes argument to block if present
@@ -23,6 +23,7 @@ __END__
   - Improved support for one-line usage messages
   - Expand combined shorthand options into their separate components
   - Shorthand options must be single letter only
+  - Support options with typed arguments
 
 2.0.0
 
