@@ -146,6 +146,38 @@ describe OptionsByExample do
     end
   end
 
+  describe "#if_present" do
+
+    it 'calls block if argument is present' do
+      this.parse_without_exit %w{-v --retries 5 example.com 80}
+
+      expect(this.if_present(:retries) { |val| val * 3 }).to eq "555"
+    end
+
+    it 'skips block if argument is nil' do
+      this.parse_without_exit %w{-v --retries 5 example.com 80}
+
+      expect(this.if_present(:timeout) { |val| val * 3 }).to be nil
+    end
+  end
+
+  describe "#include?" do
+
+    it 'returns true if option is present' do
+      this.parse_without_exit %w{-v --timeout 60 example.com 80}
+
+      expect(this.include? :verbose).to be true
+      expect(this.include? :timeout).to be true
+    end
+
+    it 'returns false if option is missing' do
+      this.parse_without_exit %w{-v --timeout 60 example.com 80}
+
+      expect(this.include? :retries).to be_falsey
+      expect(this.include? :secure).to be_falsey
+    end
+  end
+
   describe "#parse" do
 
     it 'parses options and arguments correctly' do

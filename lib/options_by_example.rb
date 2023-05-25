@@ -76,6 +76,17 @@ class OptionsByExample
     return self
   end
 
+  def if_present(name)
+    raise ArgumentError, 'block missing' unless block_given?
+
+    value = @arguments[name]
+    value.nil? ? value : (yield value)
+  end
+
+  def include?(name)
+    @options.include?(name)
+  end
+
   private
 
   def initialize_argument_accessors

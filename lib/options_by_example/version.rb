@@ -13,7 +13,9 @@ __END__
 
 3.1.0-bis
 
-  - Support dash in option names
+  - Support dash in argument and option names
+  - Method #if_present passes argument to block if present
+  - Method #include? return true if option is present
 
 3.0.0
 
