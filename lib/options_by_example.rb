@@ -89,6 +89,21 @@ class OptionsByExample
 
   private
 
+  def parse_without_exit(argv)
+    parser = Parser.new(
+      @argument_names_required,
+      @argument_names_optional,
+      @default_values,
+      @option_names,
+    )
+
+    parser.parse argv
+    @arguments = parser.arguments
+    @options = parser.options
+
+    return self
+  end
+
   def initialize_argument_accessors
     [
       *@argument_names_required,

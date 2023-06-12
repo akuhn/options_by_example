@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'options_by_example'
-
 class Binding
   def pry
     require 'pry'
@@ -9,7 +7,24 @@ class Binding
   end
 end
 
+module Helpers
+  def exit_with_status(code)
+    raise_error(SystemExit) { |err| expect(err.status).to eq code }
+  end
+
+  def output_usage_message_and_exit
+    output(start_with 'Usage:').to_stdout.and exit_with_status(0)
+  end
+
+  def output_error(message)
+    output("ERROR: #{message}\n").to_stdout.and exit_with_status(1)
+  end
+end
+
 RSpec.configure do |config|
+
+  config.include Helpers
+
   config.example_status_persistence_file_path = ".rspec_status"
 
   config.around :example do |example|
@@ -20,3 +35,11 @@ RSpec.configure do |config|
     end
   end
 end
+
+if ENV['COVERAGE']
+  require 'simplecov'
+  SimpleCov.start
+end
+
+require 'options_by_example'
+

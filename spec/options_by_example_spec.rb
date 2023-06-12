@@ -112,7 +112,7 @@ describe OptionsByExample do
   describe "#include_NAME?" do
 
     it 'returns option status' do
-      this.parse_without_exit %w{-v --timeout 60 example.com 80}
+      this.parse %w{-v --timeout 60 example.com 80}
 
       expect(this.include_verbose?).to be true
       expect(this.include_retries?).to be_falsey
@@ -124,7 +124,7 @@ describe OptionsByExample do
   describe "#argument_NAME" do
 
     it 'returns positional argument values' do
-      this.parse_without_exit %w{-v --retries 5 example.com 80}
+      this.parse %w{-v --retries 5 example.com 80}
 
       expect(this.argument_mode).to be_nil
       expect(this.argument_host).to eq "example.com"
@@ -132,14 +132,14 @@ describe OptionsByExample do
     end
 
     it 'returns optional argument values' do
-      this.parse_without_exit %w{-v --retries 5 example.com 80}
+      this.parse %w{-v --retries 5 example.com 80}
 
       expect(this.argument_retries).to eq "5"
       expect(this.argument_timeout).to be_nil
     end
 
     it 'passes arguments through block' do
-      this.parse_without_exit %w{-v --retries 5 example.com 80}
+      this.parse %w{-v --retries 5 example.com 80}
 
       expect(this.argument_retries { |val| val * 3 }).to eq "555"
       expect(this.argument_timeout { |val| val * 3 }).to be_nil
@@ -149,13 +149,13 @@ describe OptionsByExample do
   describe "#if_present" do
 
     it 'calls block if argument is present' do
-      this.parse_without_exit %w{-v --retries 5 example.com 80}
+      this.parse %w{-v --retries 5 example.com 80}
 
       expect(this.if_present(:retries) { |val| val * 3 }).to eq "555"
     end
 
     it 'skips block if argument is nil' do
-      this.parse_without_exit %w{-v --retries 5 example.com 80}
+      this.parse %w{-v --retries 5 example.com 80}
 
       expect(this.if_present(:timeout) { |val| val * 3 }).to be nil
     end
@@ -164,14 +164,14 @@ describe OptionsByExample do
   describe "#include?" do
 
     it 'returns true if option is present' do
-      this.parse_without_exit %w{-v --timeout 60 example.com 80}
+      this.parse %w{-v --timeout 60 example.com 80}
 
       expect(this.include? :verbose).to be true
       expect(this.include? :timeout).to be true
     end
 
     it 'returns false if option is missing' do
-      this.parse_without_exit %w{-v --timeout 60 example.com 80}
+      this.parse %w{-v --timeout 60 example.com 80}
 
       expect(this.include? :retries).to be_falsey
       expect(this.include? :secure).to be_falsey
@@ -181,7 +181,7 @@ describe OptionsByExample do
   describe "#parse" do
 
     it 'parses options and arguments correctly' do
-      this.parse_without_exit %w{--secure -v --retries 5 active example.com 80}
+      this.parse %w{--secure -v --retries 5 active example.com 80}
 
       expect(this.options.keys).to match_array [:secure, :verbose, :retries]
       expect(this.arguments.keys).to match_array [:retries, :mode, :host, :port]
@@ -189,44 +189,44 @@ describe OptionsByExample do
 
     it 'raises an error for unknown options' do
       expect {
-        this.parse_without_exit %w{--foo example.com 80}
-      }.to raise_error "Found unknown option '--foo'"
+        this.parse %w{--foo example.com 80}
+      }.to output_error "Found unknown option '--foo'"
     end
 
     it 'raises an error for missing required arguments' do
       expect {
-        this.parse_without_exit %w{-v example.com}
-      }.to raise_error "Expected 2 required arguments, but received only one"
+        this.parse %w{-v example.com}
+      }.to output_error "Expected 2 required arguments, but received only one"
     end
 
     it 'raises an error for missing arguments' do
       expect {
-        this.parse_without_exit %w{--retries -v example.com 80}
-      }.to raise_error "Expected argument for option '--retries', got none"
+        this.parse %w{--retries -v example.com 80}
+      }.to output_error "Expected argument for option '--retries', got none"
     end
 
     it 'raises a helpful error for unexpected arguments' do
       expect {
-        this.parse_without_exit %w{--secure gibberish -v example.com 80}
-      }.to raise_error "Unexpected arguments found before option '-v', please provide all options before arguments"
+        this.parse %w{--secure gibberish -v example.com 80}
+      }.to output_error "Unexpected arguments found before option '-v', please provide all options before arguments"
     end
 
     it 'raises a helpful error for options in argument section' do
       expect {
-        this.parse_without_exit %w{example.com 80 -v}
-      }.to raise_error "Unexpected arguments found before option '-v', please provide all options before arguments"
+        this.parse %w{example.com 80 -v}
+      }.to output_error "Unexpected arguments found before option '-v', please provide all options before arguments"
     end
 
     it 'raises a helpful error for ambigious missing arguments' do
       expect {
-        this.parse_without_exit %w{--timeout example.com 80}
-      }.to raise_error "Expected 2 required arguments, but received only one (considering --timeout takes an argument)"
+        this.parse %w{--timeout example.com 80}
+      }.to output_error "Expected 2 required arguments, but received only one (considering --timeout takes an argument)"
     end
 
     it 'raises an error for too many arguments' do
       expect {
-        this.parse_without_exit %w{active example.com 80 gibberish}
-      }.to raise_error "Expected 2-3 arguments, but received too many"
+        this.parse %w{active example.com 80 gibberish}
+      }.to output_error "Expected 2-3 arguments, but received too many"
     end
   end
 
@@ -235,14 +235,14 @@ describe OptionsByExample do
     let(:this) { OptionsByExample.new(%{Usage: $0 [--foo] [--bar ARG]}) }
 
     it 'parses empty command-line' do
-      this.parse_without_exit %w{}
+      this.parse %w{}
 
       expect(this.options).to be_empty
       expect(this.arguments.keys).to be_empty
     end
 
     it 'parses both options' do
-      this.parse_without_exit %w{--foo --bar 5309}
+      this.parse %w{--foo --bar 5309}
 
       expect(this.options.keys).to match_array [:foo, :bar]
       expect(this.arguments.keys).to match_array [:bar]
@@ -250,7 +250,7 @@ describe OptionsByExample do
     end
 
     it 'parses one option' do
-      this.parse_without_exit %w{--foo}
+      this.parse %w{--foo}
 
       expect(this.options.keys).to match_array [:foo]
       expect(this.arguments).to be_empty
@@ -258,38 +258,38 @@ describe OptionsByExample do
 
     it 'raises an error for unexpected arguments' do
       expect {
-        this.parse_without_exit %w{lorem}
-      }.to raise_error "Expected 0 arguments, but received too many"
+        this.parse %w{lorem}
+      }.to output_error "Expected 0 arguments, but received too many"
     end
 
     it 'raises an error for unexpected leading argument' do
       expect {
-        this.parse_without_exit %w{lorem --foo}
-      }.to raise_error "Unexpected arguments found before option '--foo', please provide all options before arguments"
+        this.parse %w{lorem --foo}
+      }.to output_error "Unexpected arguments found before option '--foo', please provide all options before arguments"
     end
 
     it 'raises error for unexpected intermediate argument' do
       expect {
-        this.parse_without_exit %w{--foo lorem --bar}
-      }.to raise_error "Unexpected arguments found before option '--bar', please provide all options before arguments"
+        this.parse %w{--foo lorem --bar}
+      }.to output_error "Unexpected arguments found before option '--bar', please provide all options before arguments"
     end
 
     it 'raises error for unexpected trailing argument' do
       expect {
-        this.parse_without_exit %w{--foo lorem}
-      }.to raise_error "Expected 0 arguments, but received too many"
+        this.parse %w{--foo lorem}
+      }.to output_error "Expected 0 arguments, but received too many"
     end
 
     it 'raises an error for unknown options' do
       expect {
-        this.parse_without_exit %w{--foo --qux --bar}
-      }.to raise_error "Found unknown option '--qux'"
+        this.parse %w{--foo --qux --bar}
+      }.to output_error "Found unknown option '--qux'"
     end
 
     it 'detects help option' do
       expect {
-        this.parse_without_exit %w{--foo --help --bar}
-      }.to raise_error OptionsByExample::PrintUsageMessage
+        this.parse %w{--foo --help --bar}
+      }.to output_usage_message_and_exit
     end
   end
 
@@ -298,7 +298,7 @@ describe OptionsByExample do
     let(:this) { OptionsByExample.new(%{Usage: $0 source dest}) }
 
     it 'parses example arguments' do
-      this.parse_without_exit %w{80 443}
+      this.parse %w{80 443}
 
       expect(this.options.keys).to be_empty
       expect(this.arguments.keys).to match_array [:source, :dest]
@@ -306,45 +306,45 @@ describe OptionsByExample do
 
     it 'parses help option' do
       expect {
-        this.parse_without_exit %w{--foo --bar whatever --help}
-      }.to raise_error OptionsByExample::PrintUsageMessage
+        this.parse %w{--foo --bar whatever --help}
+      }.to output_usage_message_and_exit
     end
 
     it 'raises an error for emtpy ARGV' do
       expect {
-        this.parse_without_exit %w{}
-      }.to raise_error "Expected 2 required arguments, but received none"
+        this.parse %w{}
+      }.to output_error "Expected 2 required arguments, but received none"
     end
 
     it 'raises an error for missing required argumente' do
       expect {
-        this.parse_without_exit %w{80}
-      }.to raise_error "Expected 2 required arguments, but received only one"
+        this.parse %w{80}
+      }.to output_error "Expected 2 required arguments, but received only one"
     end
 
     it 'raises an error for too many arguments' do
       expect {
-        this.parse_without_exit %w{80 443 5309}
-      }.to raise_error "Expected 2 arguments, but received too many"
+        this.parse %w{80 443 5309}
+      }.to output_error "Expected 2 arguments, but received too many"
     end
 
     it 'raises an error for unknown options' do
       expect {
-        this.parse_without_exit %w{--verbose 80 443}
-      }.to raise_error "Found unknown option '--verbose'"
+        this.parse %w{--verbose 80 443}
+      }.to output_error "Found unknown option '--verbose'"
     end
 
     it 'raises an error for arguments before options' do
       expect {
-        this.parse_without_exit %w{80 443 --verbose}
-      }.to raise_error "Found unknown option '--verbose'"
+        this.parse %w{80 443 --verbose}
+      }.to output_error "Found unknown option '--verbose'"
     end
   end
 
   describe 'shorthand options' do
 
     it 'parses shorthand options' do
-      this.parse_without_exit %w{-s -v -t 60 example.com 443}
+      this.parse %w{-s -v -t 60 example.com 443}
 
       expect(this.include_secure?).to be true
       expect(this.include_verbose?).to be true
@@ -354,7 +354,7 @@ describe OptionsByExample do
     end
 
     it 'parses stacked shorthand options' do
-      this.parse_without_exit %w{-svt 60 example.com 443}
+      this.parse %w{-svt 60 example.com 443}
 
       expect(this.include_secure?).to be true
       expect(this.include_verbose?).to be true
@@ -365,28 +365,28 @@ describe OptionsByExample do
 
     it 'raises an error for unknown stacked shorthands' do
       expect {
-        this.parse_without_exit %w{-svat example.com 443}
-      }.to raise_error "Found unknown option -a inside '-svat'"
+        this.parse %w{-svat example.com 443}
+      }.to output_error "Found unknown option -a inside '-svat'"
     end
 
     it 'raises a helpful error for matching longhand option' do
       expect {
-        this.parse_without_exit %w{-verbose example.com 80}
-      }.to raise_error "Found unknown option -e inside '-verbose', did you mean '--verbose'?"
+        this.parse %w{-verbose example.com 80}
+      }.to output_error "Found unknown option -e inside '-verbose', did you mean '--verbose'?"
     end
   end
 
   describe 'default values' do
 
     it 'uses default value' do
-      this.parse_without_exit %w{-v example.com 80}
+      this.parse %w{-v example.com 80}
 
       expect(this.include_retries?).to be_falsey
       expect(this.argument_retries).to eq '3'
     end
 
     it 'uses given value' do
-      this.parse_without_exit %w{--retries 5 -v example.com 80}
+      this.parse %w{--retries 5 -v example.com 80}
 
       expect(this.include_retries?).to be true
       expect(this.argument_retries).to eq '5'
@@ -394,8 +394,8 @@ describe OptionsByExample do
 
     it 'raises an error for missing argument' do
       expect {
-        this.parse_without_exit %w{--retries -v example.com 80}
-      }.to raise_error "Expected argument for option '--retries', got none"
+        this.parse %w{--retries -v example.com 80}
+      }.to output_error "Expected argument for option '--retries', got none"
     end
   end
 
@@ -406,21 +406,21 @@ describe OptionsByExample do
     }
 
     it 'parses integer values' do
-      this.parse_without_exit %w{--num 60}
+      this.parse %w{--num 60}
 
       expect(this.include_num?).to be true
       expect(this.argument_num).to eq 60
     end
 
     it 'parses dates' do
-      this.parse_without_exit %w{--date 1983-09-12}
+      this.parse %w{--date 1983-09-12}
 
       expect(this.include_date?).to be true
       expect(this.argument_date).to be_a Date
     end
 
     it 'parses timestamps' do
-      this.parse_without_exit %w{--time 14:41}
+      this.parse %w{--time 14:41}
 
       expect(this.include_time?).to be true
       expect(this.argument_time).to be_a Time
@@ -428,8 +428,8 @@ describe OptionsByExample do
 
     it 'raises a helpful error for invalid arguments' do
       expect {
-        this.parse_without_exit %w{--num foo}
-      }.to raise_error "Invalid argument \"foo\" for option '--num', please provide an integer value"
+        this.parse %w{--num foo}
+      }.to output_error "Invalid argument \"foo\" for option '--num', please provide an integer value"
     end
   end
 end

@@ -6,4 +6,4 @@ gemspec # Specify your gem's dependencies in options_by_example.gemspec
 
 gem 'pry'
 gem 'rspec'
-
+gem 'simplecov'
