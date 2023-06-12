@@ -30,15 +30,15 @@ require 'options_by_example'
 
 Options = OptionsByExample.read(DATA).parse(ARGV)
 
-puts Options.include_secure?
-puts Options.include_verbose?
-puts Options.include_retries?
-puts Options.include_timeout?
-puts Options.argument_retries
-puts Options.argument_timeout
-puts Options.argument_mode
-puts Options.argument_host
-puts Options.argument_port
+puts Options.include? :secure
+puts Options.include? :verbose
+puts Options.include? :retries
+puts Options.include? :timeout
+puts Options.get :retries
+puts Options.get :timeout
+puts Options.get :mode
+puts Options.get :host
+puts Options.get :port
 
 
 __END__
@@ -50,8 +50,8 @@ Usage: connect [options] [mode] host port
 Options:
   -s, --secure        Establish a secure connection (SSL/TSL)
   -v, --verbose       Enable verbose output for detailed information
-  -r, --retries NUM   Specify the number of connection retries (default 3)
-  -t, --timeout NUM   Set the connection timeout in seconds (default 10)
+  -r, --retries NUM   Number of connection retries (default 3)
+  -t, --timeout NUM   Set connection timeout in seconds
 
 Arguments:
   [mode]              Optional connection mode (active or passive)
