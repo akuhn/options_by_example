@@ -8,6 +8,7 @@ class OptionsByExample
 
   attr_reader :arguments
   attr_reader :options
+  attr_reader :usage_message
 
   def self.read(data)
     return new data.read
@@ -61,19 +62,12 @@ class OptionsByExample
     exit 1
   end
 
-  def parse_without_exit(argv)
-    parser = Parser.new(
-      @argument_names_required,
-      @argument_names_optional,
-      @default_values,
-      @option_names,
-    )
+  def fetch(*args, &block)
+    @arguments.fetch(*args, &block)
+  end
 
-    parser.parse argv
-    @arguments = parser.arguments
-    @options = parser.options
-
-    return self
+  def get(name)
+    @arguments[name]
   end
 
   def if_present(name)

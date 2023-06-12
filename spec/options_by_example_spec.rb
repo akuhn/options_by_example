@@ -146,6 +146,40 @@ describe OptionsByExample do
     end
   end
 
+  describe "#fetch" do
+
+    it 'calls block if argument is present' do
+      this.parse %w{-v --retries 5 example.com 80}
+
+      expect(this.fetch :retries).to eq "5"
+      expect(this.fetch :retries, "9000").to eq "5"
+      expect(this.fetch(:retries) { "9000" }).to eq "5"
+    end
+
+    it 'skips block if argument is nil' do
+      this.parse %w{-v --retries 5 example.com 80}
+
+      expect { this.fetch :timeout }.to raise_error KeyError
+      expect(this.fetch :timeout, "9000").to eq "9000"
+      expect(this.fetch(:timeout) { "9000" }).to eq "9000"
+    end
+  end
+
+  describe "#get" do
+
+    it 'calls block if argument is present' do
+      this.parse %w{-v --retries 5 example.com 80}
+
+      expect(this.get :retries).to eq "5"
+    end
+
+    it 'skips block if argument is nil' do
+      this.parse %w{-v --retries 5 example.com 80}
+
+      expect(this.get :timeout).to be nil
+    end
+  end
+
   describe "#if_present" do
 
     it 'calls block if argument is present' do
