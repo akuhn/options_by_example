@@ -25,8 +25,6 @@ RSpec.configure do |config|
 
   config.include Helpers
 
-  config.example_status_persistence_file_path = ".rspec_status"
-
   config.around :example do |example|
     begin
       example.run

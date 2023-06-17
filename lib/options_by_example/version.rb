@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '3.2.0-beta'
+  VERSION = '3.2.0'
 end
 
 
@@ -13,9 +13,9 @@ __END__
 
 3.2.0
 
-  - Method #get returns specified argument or nil
-  - Method #fetch returns specified argument, or raises key error
-  - Marked internal method #parse_without_exit as private
+  - New method #get returns argument value or nil
+  - New method #fetch returns argument value or raises error
+  - Changed internal method #parse_without_exit to private
 
 3.1.0
 
