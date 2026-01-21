@@ -92,8 +92,8 @@ class OptionsByExample
     )
 
     parser.parse argv
-    @arguments = parser.arguments
-    @options = parser.options
+    @arguments = parser.argument_values
+    @options = parser.option_values
 
     return self
   end
