@@ -39,6 +39,7 @@ class OptionsByExample
 
       raise_if_help_option
       unpack_combined_shorthand_options
+      expand_dash_number_to_dash_n_option
       raise_if_unknown_options
       parse_options
 
@@ -87,6 +88,14 @@ class OptionsByExample
       end
 
       @slices = list
+    end
+
+    def expand_dash_number_to_dash_n_option
+      @slices.each do |each|
+        if each.first =~ /^-(\d+)$/
+          each[0..0] = ['-n', $1]
+        end
+      end
     end
 
     def raise_if_unknown_options

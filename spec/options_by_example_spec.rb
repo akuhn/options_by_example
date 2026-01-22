@@ -410,6 +410,20 @@ describe OptionsByExample do
     end
   end
 
+  describe 'dash-number' do
+
+    let(:this) {
+      OptionsByExample.new(%{Usage: $0 [-n, --num NUM]})
+    }
+
+    it 'expands to dash-n option' do
+      this.parse %w{-15}
+
+      expect(this.include_num?).to be true
+      expect(this.argument_num).to eq 15
+    end
+  end
+
   describe 'default values' do
 
     it 'uses default value' do

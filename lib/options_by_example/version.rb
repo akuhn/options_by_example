@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '3.2.0'
+  VERSION = '3.3.0'
 end
 
 
@@ -10,6 +10,9 @@ __END__
 # Major version bump when breaking changes or new features
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
+
+3.3.0
+  - Expand dash-number to dash-n option
 
 3.2.0
 
