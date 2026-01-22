@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '3.2.0'
+  VERSION = '4.0.0'
 end
 
 
@@ -10,6 +10,11 @@ __END__
 # Major version bump when breaking changes or new features
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
+
+4.0.0
+  - Unified arguments and options into one hash called arguments
+  - Methods #include? and #include_{name}? return true for defaults
+  - Renamed dynamic #argument_{name} methods to #get_{name}
 
 3.2.0
 

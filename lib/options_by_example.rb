@@ -7,7 +7,6 @@ require 'options_by_example/parser'
 class OptionsByExample
 
   attr_reader :arguments
-  attr_reader :options
   attr_reader :usage_message
 
   def self.read(data)
@@ -78,7 +77,7 @@ class OptionsByExample
   end
 
   def include?(name)
-    @options.include?(name)
+    @arguments.include?(name)
   end
 
   private
@@ -91,9 +90,7 @@ class OptionsByExample
       @option_names,
     )
 
-    parser.parse argv
-    @arguments = parser.argument_values
-    @options = parser.option_values
+    @arguments = parser.parse(argv)
 
     return self
   end
@@ -105,7 +102,7 @@ class OptionsByExample
       *@option_names.values.select(&:last).map(&:first),
     ].each do |argument_name|
       instance_eval %{
-        def argument_#{argument_name}
+        def get_#{argument_name}
           val = @arguments[:#{argument_name}]
           val && block_given? ? (yield val) : val
         end
@@ -117,7 +114,7 @@ class OptionsByExample
     @option_names.each_value do |option_name, _|
       instance_eval %{
         def include_#{option_name}?
-          @options.include? :#{option_name}
+          @arguments.include? :#{option_name}
         end
       }
     end

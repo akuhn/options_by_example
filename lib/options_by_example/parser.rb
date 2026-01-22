@@ -11,8 +11,7 @@ class OptionsByExample
 
   class Parser
 
-    attr_reader :option_values
-    attr_reader :argument_values
+    attr_reader :parsed_values
 
     def initialize(argument_names_required, argument_names_optional, default_values, option_names)
       @argument_names_required = argument_names_required
@@ -20,8 +19,7 @@ class OptionsByExample
       @default_values = default_values
       @option_names = option_names
 
-      @argument_values = @default_values.dup
-      @option_values = {}
+      @parsed_values = @default_values.dup
     end
 
     def parse(array)
@@ -47,6 +45,8 @@ class OptionsByExample
       parse_optional_arguments
 
       raise "Internal error: unreachable state" unless @remainder.empty?
+
+      return @parsed_values
     end
 
     private
@@ -102,7 +102,7 @@ class OptionsByExample
         end
 
         option_name, argument_name = @option_names[option]
-        @option_values[option_name] = true
+        @parsed_values[option_name] = true
 
         if argument_name
           raise "Expected argument for option '#{option}', got none" if args.empty?
@@ -124,7 +124,7 @@ class OptionsByExample
             raise "Invalid argument \"#{value}\" for option '#{option}', please provide #{expected_type}"
           end
 
-          @argument_values[option_name] = value
+          @parsed_values[option_name] = value
           @option_took_argument = option
         else
           @option_took_argument = nil
@@ -154,14 +154,14 @@ class OptionsByExample
       stash = @remainder.pop(@argument_names_required.length)
       @argument_names_required.each do |argument_name|
         raise "Missing required argument '#{argument_name}'" if stash.empty?
-        @argument_values[argument_name] = stash.shift
+        @parsed_values[argument_name] = stash.shift
       end
     end
 
     def parse_optional_arguments
       @argument_names_optional.each do |argument_name|
         break if @remainder.empty?
-        @argument_values[argument_name] = @remainder.shift
+        @parsed_values[argument_name] = @remainder.shift
       end
     end
   end
