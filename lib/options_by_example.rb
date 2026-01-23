@@ -24,10 +24,23 @@ class OptionsByExample
     #
     # Usage: connect [options] [mode] host port
 
-    text =~ /Usage: (\$0|\w+)(?: \[options\])?((?: \[\w+\])*)((?: \w+)*)/
-    raise RuntimeError, "Expected usage string, got none" unless $1
-    @argument_names_optional = $2.to_s.split.map { |match| sanitize match.tr('[]', '') }
-    @argument_names_required = $3.to_s.split.map { |match| sanitize match }
+    @argument_names_optional = []
+    @argument_names_required = []
+
+    usage_line = text.lines.grep(/Usage:/).first
+    raise RuntimeError, "Expected usage string, got none" unless usage_line
+    tokens = usage_line.scan(/\[.*?\]|\S+/)
+    raise unless tokens.shift
+    raise unless tokens.shift
+    tokens.shift if tokens.first == '[options]'
+
+    while /^\[\w+\]$/ === tokens.first
+      @argument_names_optional << (sanitize tokens.shift.tr '[]', '')
+    end
+
+    while /^\w+$/ === tokens.first
+      @argument_names_required << (sanitize tokens.shift)
+    end
 
     # --- 2) Parse option names ---------------------------------------
     #
