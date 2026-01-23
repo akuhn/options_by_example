@@ -26,6 +26,7 @@ class OptionsByExample
 
     @argument_names_optional = []
     @argument_names_required = []
+    oneline_options = []
 
     usage_line = text.lines.grep(/Usage:/).first
     raise RuntimeError, "Expected usage string, got none" unless usage_line
@@ -33,6 +34,10 @@ class OptionsByExample
     raise unless tokens.shift
     raise unless tokens.shift
     tokens.shift if tokens.first == '[options]'
+
+    while /^\[--?\w.*\]$/ === tokens.first
+      oneline_options << tokens.shift
+    end
 
     while /^\[\w+\]$/ === tokens.first
       @argument_names_optional << (sanitize tokens.shift.tr '[]', '')
@@ -55,7 +60,10 @@ class OptionsByExample
 
     @option_names = {}
     @default_values = {}
-    text.scan(/(?:(-\w), ?)?(--([\w-]+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/) do
+
+    options = oneline_options + text.lines.grep(/^\s*--?\w/)
+    options.each do |string|
+      string =~ /(?:(-\w), ?)?(--([\w-]+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/
       flags = [$1, $2].compact
       flags.each { |each| @option_names[each] = [(sanitize $3), $4] }
       @default_values[sanitize $3] = $5 if $5

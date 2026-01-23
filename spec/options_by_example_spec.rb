@@ -25,6 +25,14 @@ describe OptionsByExample do
     expect(this.include_interactive?).to be false
   end
 
+  it 'supports one-line usage messages with positional arguments' do
+    usage = 'Usage: connect [-s, --secure] [mode] host port'
+    this = OptionsByExample.new(usage).parse(%w{-s passive example.com 80})
+
+    expect(this.include_secure?).to be true
+    expect(this.argument_mode).to eq 'passive'
+  end
+
   let(:usage_message) {
     %{
       Establishes network connection to designated host and port, enabling
@@ -264,7 +272,7 @@ describe OptionsByExample do
     end
   end
 
-  describe "parsing options only" do
+  describe "parsing options" do
 
     let(:this) { OptionsByExample.new(%{Usage: $0 [--foo] [--bar ARG]}) }
 
@@ -327,7 +335,7 @@ describe OptionsByExample do
     end
   end
 
-  describe "parsing required arguments only" do
+  describe "parsing required arguments" do
 
     let(:this) { OptionsByExample.new(%{Usage: $0 source dest}) }
 
