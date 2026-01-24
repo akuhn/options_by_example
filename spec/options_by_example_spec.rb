@@ -33,6 +33,46 @@ describe OptionsByExample do
     expect(this.argument_mode).to eq 'passive'
   end
 
+  it 'supports shorthand-only option' do
+    usage = 'Usage: convert [-q] [-d] [-r] fname'
+    this = OptionsByExample.new(usage).parse(%w{-r example.png})
+
+    expect(this.include_r?).to be true
+    expect(this.argument_fname).to eq 'example.png'
+  end
+
+  it 'supports shorthand-only option with argument' do
+    usage = 'Usage: head [-n NUM] fname'
+    this = OptionsByExample.new(usage).parse(%w{-n 20 example.md})
+
+    expect(this.argument_n).to eq 20
+    expect(this.argument_fname).to eq 'example.md'
+  end
+
+  xit 'supports shorthand-only option with default value' do
+    usage = 'Usage: head [-n NUM (default 10)] fname'
+    this = OptionsByExample.new(usage).parse(%w{example.md})
+
+    expect(this.argument_n).to eq '10'
+    expect(this.argument_fname).to eq 'example.md'
+  end
+
+  xit 'supports trailing vararg arguments' do
+    usage = 'Usage: archive zipfile files...'
+    this = OptionsByExample.new(usage).parse(%w{example foo bar})
+
+    expect(this.argument_zipfile).to eq 'example'
+    expect(this.argument_files).to eq ['foo', 'bar']
+  end
+
+  xit 'supports leading vararg arguments' do
+    usage = 'Usage: join sources... dest'
+    this = OptionsByExample.new(usage).parse(%w{foo bar example})
+
+    expect(this.argument_sources).to eq ['foo', 'bar']
+    expect(this.argument_dest).to eq 'example'
+  end
+
   let(:usage_message) {
     %{
       Establishes network connection to designated host and port, enabling

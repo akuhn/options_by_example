@@ -36,7 +36,7 @@ class OptionsByExample
     tokens.shift if tokens.first == '[options]'
 
     while /^\[--?\w.*\]$/ === tokens.first
-      oneline_options << tokens.shift
+      oneline_options << tokens.shift[1...-1]
     end
 
     while /^\[\w+\]$/ === tokens.first
@@ -63,10 +63,34 @@ class OptionsByExample
 
     options = oneline_options + text.lines.grep(/^\s*--?\w/)
     options.each do |string|
-      string =~ /(?:(-\w), ?)?(--([\w-]+))(?: (\w+))?(?:.*\(default:? (\w+)\))?/
-      flags = [$1, $2].compact
-      flags.each { |each| @option_names[each] = [(sanitize $3), $4] }
-      @default_values[sanitize $3] = $5 if $5
+      tokens = string.scan(/--?\w[\w-]*(?: \w+)?|,|\(default \S+\)|\S+/)
+
+      short_form = nil
+      long_form = nil
+      option_name = nil
+      argument_name = nil
+      default_value = nil
+
+      if /^-(\w)( \w+)?$/ === tokens.first
+        short_form, argument_name = tokens.shift.split
+        option_name = sanitize $1
+        tokens.shift if ',' === tokens.first
+      end
+
+      if /^--([\w-]+)( \w+)?$/ === tokens.first
+        long_form, argument_name = tokens.shift.split
+        option_name = sanitize $1
+      end
+
+      if /^\(default (\S+)\)$/ === tokens.last
+        default_value = $1
+      end
+
+      [short_form, long_form].compact.each do |each|
+        @option_names[each] = [option_name, argument_name]
+      end
+
+      @default_values[option_name] = default_value if default_value
     end
 
     initialize_argument_accessors
