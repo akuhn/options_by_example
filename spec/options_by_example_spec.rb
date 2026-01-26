@@ -35,6 +35,7 @@ describe OptionsByExample do
 
   it 'supports shorthand-only option' do
     usage = 'Usage: convert [-q] [-d] [-r] fname'
+
     this = OptionsByExample.new(usage).parse(%w{-r example.png})
 
     expect(this.include_r?).to be true
@@ -98,15 +99,15 @@ describe OptionsByExample do
   describe "#initialize" do
 
     it 'parses optional argument names' do
-      expect(this.instance_variable_get :@argument_names_optional).to eq [:mode]
+      expect(this.usage_spec.argument_names_optional).to eq [:mode]
     end
 
     it 'parses required argument names' do
-      expect(this.instance_variable_get :@argument_names_required).to eq [:host, :port]
+      expect(this.usage_spec.argument_names_required).to eq [:host, :port]
     end
 
     it 'parses all options' do
-      option_names = this.instance_variable_get :@option_names
+      option_names = this.usage_spec.option_names
       expect(option_names['-v']).to eq [:verbose, nil]
       expect(option_names['--verbose']).to eq [:verbose, nil]
       expect(option_names['--retries']).to eq [:retries, "ARG"]
@@ -114,7 +115,7 @@ describe OptionsByExample do
     end
 
     it 'parses default values' do
-      default_values = this.instance_variable_get :@default_values
+      default_values = this.usage_spec.default_values
       expect(default_values[:retries]).to eq "3"
       expect(default_values.size).to be 1
     end

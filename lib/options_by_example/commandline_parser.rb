@@ -9,16 +9,16 @@ class OptionsByExample
   class PrintUsageMessage < StandardError
   end
 
-  class Parser
+  class CommandlineParser
 
     attr_reader :option_values
     attr_reader :argument_values
 
-    def initialize(argument_names_required, argument_names_optional, default_values, option_names)
-      @argument_names_required = argument_names_required
-      @argument_names_optional = argument_names_optional
-      @default_values = default_values
-      @option_names = option_names
+    def initialize(usage)
+      @argument_names_required = usage.argument_names_required
+      @argument_names_optional = usage.argument_names_optional
+      @default_values = usage.default_values
+      @option_names = usage.option_names
 
       @argument_values = @default_values.dup
       @option_values = {}
