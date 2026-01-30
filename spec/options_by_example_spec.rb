@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'options_by_example'
 
 
 describe OptionsByExample do
@@ -36,7 +37,9 @@ describe OptionsByExample do
   it 'supports shorthand-only option' do
     usage = 'Usage: convert [-q] [-d] [-r] fname'
 
-    this = OptionsByExample.new(usage).parse(%w{-r example.png})
+    this = OptionsByExample
+      .new(usage)
+      .parse(%w{-r example.png})
 
     expect(this.include_r?).to be true
     expect(this.argument_fname).to eq 'example.png'
@@ -98,12 +101,12 @@ describe OptionsByExample do
 
   describe "#initialize" do
 
-    it 'parses optional argument names' do
-      expect(this.usage_spec.argument_names_optional).to eq [:mode]
-    end
-
-    it 'parses required argument names' do
-      expect(this.usage_spec.argument_names_required).to eq [:host, :port]
+    it 'parses argument names' do
+      argument_names = this.usage_spec.argument_names
+      expect(argument_names).to include mode: :zero_or_one
+      expect(argument_names).to include host: :one
+      expect(argument_names).to include port: :one
+      expect(argument_names.size).to be 3
     end
 
     it 'parses all options' do

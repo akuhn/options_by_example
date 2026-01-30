@@ -5,8 +5,7 @@ class OptionsByExample
   class UsageSpecification
 
     attr_reader :message
-    attr_reader :argument_names_optional
-    attr_reader :argument_names_required
+    attr_reader :argument_names
     attr_reader :default_values
     attr_reader :option_names
 
@@ -20,9 +19,8 @@ class OptionsByExample
       #
       # Usage: connect [options] [mode] host port
 
-      @argument_names_optional = []
-      @argument_names_required = []
-      oneline_options = []
+      @argument_names = {}
+      inline_options = []
 
       usage_line = text.lines.grep(/Usage:/).first
       raise RuntimeError, "Expected usage string, got none" unless usage_line
@@ -31,17 +29,33 @@ class OptionsByExample
       raise unless tokens.shift
       tokens.shift if tokens.first == '[options]'
 
-      while /^\[--?\w.*\]$/ === tokens.first
-        oneline_options << tokens.shift[1...-1]
+      while /^\[(--?\w.*)\]$/ === tokens.first
+        inline_options << (tokens.shift && $1)
       end
 
-      while /^\[\w+\]$/ === tokens.first
-        @argument_names_optional << (sanitize tokens.shift.tr '[]', '')
+      while /^\[(\w+)\]$/ === tokens.first
+        @argument_names[sanitize tokens.shift && $1] = :zero_or_one
       end
 
-      while /^\w+$/ === tokens.first
-        @argument_names_required << (sanitize tokens.shift)
+      while /^(\w+)\.\.\.$/ === tokens.first
+        @argument_names[sanitize tokens.shift && $1] = :one_or_more
       end
+
+      while /^(\w+)$/ === tokens.first
+        @argument_names[sanitize tokens.shift && $1] = :one
+      end
+
+      while /^(\w+)\.\.\.$/ === tokens.first
+        @argument_names[sanitize tokens.shift && $1] = :one_or_more
+      end
+
+      raise unless tokens.empty?
+
+      count_optional_arguments = @argument_names.values.count(:zero_or_one)
+      count_vararg_arguments = @argument_names.values.count(:one_or_more)
+
+      raise if count_optional_arguments > 0 && count_vararg_arguments > 0
+      raise if count_vararg_arguments > 1
 
       # --- 2) Parse option names ---------------------------------------
       #
@@ -57,7 +71,7 @@ class OptionsByExample
       @option_names = {}
       @default_values = {}
 
-      options = oneline_options + text.lines.grep(/^\s*--?\w/)
+      options = inline_options + text.lines.grep(/^\s*--?\w/)
       options.each do |string|
         tokens = string.scan(/--?\w[\w-]*(?: \w+)?|,|\(default \S+\)|\S+/)
 

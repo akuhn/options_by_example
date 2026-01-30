@@ -15,8 +15,7 @@ class OptionsByExample
     attr_reader :argument_values
 
     def initialize(usage)
-      @argument_names_required = usage.argument_names_required
-      @argument_names_optional = usage.argument_names_optional
+      @argument_names = usage.argument_names
       @default_values = usage.default_values
       @option_names = usage.option_names
 
@@ -144,8 +143,11 @@ class OptionsByExample
     end
 
     def validate_number_of_arguments
-      min_length = @argument_names_required.size
-      max_length = @argument_names_optional.size + min_length
+      count_optional_arguments = @argument_names.values.count(:zero_or_one)
+      count_required_arguments = @argument_names.values.count(:one)
+
+      min_length = count_required_arguments
+      max_length = count_required_arguments + count_optional_arguments
 
       if @remainder.size > max_length
         range = [min_length, max_length].uniq.join(?-)
@@ -160,15 +162,16 @@ class OptionsByExample
     end
 
     def parse_required_arguments
-      stash = @remainder.pop(@argument_names_required.length)
-      @argument_names_required.each do |argument_name|
-        raise "Missing required argument '#{argument_name}'" if stash.empty?
-        @argument_values[argument_name] = stash.shift
+      @argument_names.reverse_each do |argument_name, arity|
+        break if arity == :zero_or_one
+        raise "Missing required argument '#{argument_name}'" if @remainder.empty?
+        @argument_values[argument_name] = @remainder.pop
       end
     end
 
     def parse_optional_arguments
-      @argument_names_optional.each do |argument_name|
+      @argument_names.each do |argument_name, arity|
+        break unless arity == :zero_or_one
         break if @remainder.empty?
         @argument_values[argument_name] = @remainder.shift
       end

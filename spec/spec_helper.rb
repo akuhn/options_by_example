@@ -38,6 +38,3 @@ if ENV['COVERAGE']
   require 'simplecov'
   SimpleCov.start { enable_coverage :branch }
 end
-
-require 'options_by_example'
-
