@@ -10,8 +10,9 @@ eval "$(rbenv init -)"
 for version in $(rbenv versions --bare); do
   rbenv shell $version
   printf -- '-%.0s' {1..72}; echo
-  echo "Using $(ruby --version)"
-  rspec --format progress
+  echo "-- using $(ruby --version)"
+  bundle install --quiet
+  bundle exec rspec --format progress
 done
 
 rbenv shell system
