@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require './lib/options_by_example/version'
 
 
@@ -42,7 +41,8 @@ Gem::Specification.new do |spec|
   spec.files = %w{
     README.md
     lib/options_by_example.rb
-    lib/options_by_example/parser.rb
+    lib/options_by_example/commandline_parser.rb
+    lib/options_by_example/usage_specification.rb
     lib/options_by_example/version.rb
   }
 
