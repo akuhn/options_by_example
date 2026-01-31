@@ -13,6 +13,8 @@ __END__
 
 3.3.0
   - Expand dash-number to dash-n option
+  - Complete support for inline specification of options
+  - Support variadic arguments using dot-dot-dot
 
 3.2.0
 
