@@ -145,11 +145,12 @@ class OptionsByExample
     def validate_number_of_arguments
       count_optional_arguments = @argument_names.values.count(:zero_or_one)
       count_required_arguments = @argument_names.values.count(:one)
+      count_variadic_arguments = @argument_names.values.count(:one_or_more)
 
-      min_length = count_required_arguments
+      min_length = count_required_arguments + count_variadic_arguments
       max_length = count_required_arguments + count_optional_arguments
 
-      if @remainder.size > max_length
+      if @remainder.size > max_length && count_variadic_arguments == 0
         range = [min_length, max_length].uniq.join(?-)
         raise "Expected #{range} arguments, but received too many"
       end
@@ -162,9 +163,26 @@ class OptionsByExample
     end
 
     def parse_required_arguments
+      if @argument_names.values.include?(:one_or_more)
+        remaining_arguments = @argument_names.length
+        @argument_names.each do |argument_name, arity|
+          raise "unreachable" if @remainder.empty?
+          remaining_arguments -= 1
+          case arity
+          when :one
+            @argument_values[argument_name] = @remainder.shift
+          when :one_or_more
+            @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
+          else
+            raise "unreachable"
+          end
+        end
+        return
+      end
+
       @argument_names.reverse_each do |argument_name, arity|
         break if arity == :zero_or_one
-        raise "Missing required argument '#{argument_name}'" if @remainder.empty?
+        raise "unreachable" if @remainder.empty?
         @argument_values[argument_name] = @remainder.pop
       end
     end

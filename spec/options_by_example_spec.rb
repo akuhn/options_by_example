@@ -53,7 +53,7 @@ describe OptionsByExample do
     expect(this.argument_fname).to eq 'example.md'
   end
 
-  xit 'supports shorthand-only option with default value' do
+  it 'supports shorthand-only option with default value' do
     usage = 'Usage: head [-n NUM (default 10)] fname'
     this = OptionsByExample.new(usage).parse(%w{example.md})
 
@@ -61,7 +61,7 @@ describe OptionsByExample do
     expect(this.argument_fname).to eq 'example.md'
   end
 
-  xit 'supports trailing vararg arguments' do
+  it 'supports trailing vararg arguments' do
     usage = 'Usage: archive zipfile files...'
     this = OptionsByExample.new(usage).parse(%w{example foo bar})
 
@@ -69,7 +69,7 @@ describe OptionsByExample do
     expect(this.argument_files).to eq ['foo', 'bar']
   end
 
-  xit 'supports leading vararg arguments' do
+  it 'supports leading vararg arguments' do
     usage = 'Usage: join sources... dest'
     this = OptionsByExample.new(usage).parse(%w{foo bar example})
 
