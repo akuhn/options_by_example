@@ -77,6 +77,15 @@ describe OptionsByExample do
     expect(this.argument_dest).to eq 'example'
   end
 
+  it 'handles repeated argument in the middle of three arguments' do
+    usage = 'Usage: convert input files... format'
+    this = OptionsByExample.new(usage).parse(%w{foo bar baz qux jpeg})
+
+    expect(this.argument_input).to eq 'foo'
+    expect(this.argument_files).to eq ['bar', 'baz', 'qux']
+    expect(this.argument_format).to eq 'jpeg'
+  end
+
   let(:usage_message) {
     %{
       Establishes network connection to designated host and port, enabling

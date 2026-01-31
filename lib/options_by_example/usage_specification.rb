@@ -24,38 +24,34 @@ class OptionsByExample
 
       usage_line = text.lines.grep(/Usage:/).first
       raise RuntimeError, "Expected usage string, got none" unless usage_line
-      tokens = usage_line.scan(/\[.*?\]|\S+/)
+      tokens = usage_line.scan(/\[.*?\]|\w+ \.\.\.|\S+/)
       raise unless tokens.shift
       raise unless tokens.shift
       tokens.shift if tokens.first == '[options]'
 
       while /^\[(--?\w.*)\]$/ === tokens.first
-        inline_options << (tokens.shift && $1)
+        inline_options << $1
+        tokens.shift
       end
 
       while /^\[(\w+)\]$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :optional
+        @argument_names[sanitize $1] = :optional
+        tokens.shift
       end
 
-      while /^(\w+)\.\.\.$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :repeated
+      while /^(\w+)( ?\.\.\.)?$/ === tokens.first
+        vararg_if_dotted = $2 ? :vararg : :required
+        @argument_names[sanitize $1] = vararg_if_dotted
+        tokens.shift
       end
 
-      while /^(\w+)$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :required
-      end
-
-      while /^(\w+)\.\.\.$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :repeated
-      end
-
-      raise unless tokens.empty?
+      raise "Found invalid usage token '#{tokens.first}'" unless tokens.empty?
 
       count_optional_arguments = @argument_names.values.count(:optional)
-      count_vararg_arguments = @argument_names.values.count(:repeated)
+      count_vararg_arguments = @argument_names.values.count(:vararg)
 
-      raise if count_optional_arguments > 0 && count_vararg_arguments > 0
-      raise if count_vararg_arguments > 1
+      raise "Cannot combine dotted and optional arguments" if count_optional_arguments > 0 && count_vararg_arguments > 0
+      raise "Found more than one dotted arguments" if count_vararg_arguments > 1
 
       # --- 2) Parse option names ---------------------------------------
       #

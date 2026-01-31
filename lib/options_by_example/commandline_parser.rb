@@ -145,12 +145,12 @@ class OptionsByExample
     def validate_number_of_arguments
       count_optional_arguments = @argument_names.values.count(:optional)
       count_required_arguments = @argument_names.values.count(:required)
-      count_variadic_arguments = @argument_names.values.count(:repeated)
+      count_vararg_arguments = @argument_names.values.count(:vararg)
 
-      min_length = count_required_arguments + count_variadic_arguments
+      min_length = count_required_arguments + count_vararg_arguments
       max_length = count_required_arguments + count_optional_arguments
 
-      if @remainder.size > max_length && count_variadic_arguments == 0
+      if @remainder.size > max_length && count_vararg_arguments == 0
         range = [min_length, max_length].uniq.join(?-)
         raise "Expected #{range} arguments, but received too many"
       end
@@ -163,7 +163,7 @@ class OptionsByExample
     end
 
     def parse_required_arguments
-      if @argument_names.values.include?(:repeated)
+      if @argument_names.values.include?(:vararg)
         remaining_arguments = @argument_names.length
         @argument_names.each do |argument_name, arity|
           raise "unreachable" if @remainder.empty?
@@ -171,7 +171,7 @@ class OptionsByExample
           case arity
           when :required
             @argument_values[argument_name] = @remainder.shift
-          when :repeated
+          when :vararg
             @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
           else
             raise "unreachable"
