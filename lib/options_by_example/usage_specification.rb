@@ -34,25 +34,25 @@ class OptionsByExample
       end
 
       while /^\[(\w+)\]$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :zero_or_one
+        @argument_names[sanitize tokens.shift && $1] = :optional
       end
 
       while /^(\w+)\.\.\.$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :one_or_more
+        @argument_names[sanitize tokens.shift && $1] = :repeated
       end
 
       while /^(\w+)$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :one
+        @argument_names[sanitize tokens.shift && $1] = :required
       end
 
       while /^(\w+)\.\.\.$/ === tokens.first
-        @argument_names[sanitize tokens.shift && $1] = :one_or_more
+        @argument_names[sanitize tokens.shift && $1] = :repeated
       end
 
       raise unless tokens.empty?
 
-      count_optional_arguments = @argument_names.values.count(:zero_or_one)
-      count_vararg_arguments = @argument_names.values.count(:one_or_more)
+      count_optional_arguments = @argument_names.values.count(:optional)
+      count_vararg_arguments = @argument_names.values.count(:repeated)
 
       raise if count_optional_arguments > 0 && count_vararg_arguments > 0
       raise if count_vararg_arguments > 1

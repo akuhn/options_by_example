@@ -143,9 +143,9 @@ class OptionsByExample
     end
 
     def validate_number_of_arguments
-      count_optional_arguments = @argument_names.values.count(:zero_or_one)
-      count_required_arguments = @argument_names.values.count(:one)
-      count_variadic_arguments = @argument_names.values.count(:one_or_more)
+      count_optional_arguments = @argument_names.values.count(:optional)
+      count_required_arguments = @argument_names.values.count(:required)
+      count_variadic_arguments = @argument_names.values.count(:repeated)
 
       min_length = count_required_arguments + count_variadic_arguments
       max_length = count_required_arguments + count_optional_arguments
@@ -163,15 +163,15 @@ class OptionsByExample
     end
 
     def parse_required_arguments
-      if @argument_names.values.include?(:one_or_more)
+      if @argument_names.values.include?(:repeated)
         remaining_arguments = @argument_names.length
         @argument_names.each do |argument_name, arity|
           raise "unreachable" if @remainder.empty?
           remaining_arguments -= 1
           case arity
-          when :one
+          when :required
             @argument_values[argument_name] = @remainder.shift
-          when :one_or_more
+          when :repeated
             @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
           else
             raise "unreachable"
@@ -181,7 +181,7 @@ class OptionsByExample
       end
 
       @argument_names.reverse_each do |argument_name, arity|
-        break if arity == :zero_or_one
+        break if arity == :optional
         raise "unreachable" if @remainder.empty?
         @argument_values[argument_name] = @remainder.pop
       end
@@ -189,7 +189,7 @@ class OptionsByExample
 
     def parse_optional_arguments
       @argument_names.each do |argument_name, arity|
-        break unless arity == :zero_or_one
+        break unless arity == :optional
         break if @remainder.empty?
         @argument_values[argument_name] = @remainder.shift
       end

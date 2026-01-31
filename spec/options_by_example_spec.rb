@@ -103,9 +103,9 @@ describe OptionsByExample do
 
     it 'parses argument names' do
       argument_names = this.usage_spec.argument_names
-      expect(argument_names).to include mode: :zero_or_one
-      expect(argument_names).to include host: :one
-      expect(argument_names).to include port: :one
+      expect(argument_names).to include mode: :optional
+      expect(argument_names).to include host: :required
+      expect(argument_names).to include port: :required
       expect(argument_names.size).to be 3
     end
 
