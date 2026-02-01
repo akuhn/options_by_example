@@ -25,7 +25,7 @@ class OptionsByExample
       usage_line = text.lines.grep(/Usage:/).first
       raise RuntimeError, "Expected usage string, got none" unless usage_line
       tokens = usage_line.scan(/\[.*?\]|\w+ \.\.\.|\S+/)
-      raise unless tokens.shift
+      raise unless tokens.shift == 'Usage:'
       raise unless tokens.shift
       tokens.shift if tokens.first == '[options]'
 

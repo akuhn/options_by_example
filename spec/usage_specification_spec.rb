@@ -21,6 +21,30 @@ describe 'UsageSpecification' do
     }.to raise_error "Found invalid usage token '^^^'"
   end
 
+  it 'chokes on preceeding text' do
+    expect {
+      parse_spec 'preceeding text Usage:'
+    }.to raise_error RuntimeError
+  end
+
+  it 'expects command name or fails' do
+    expect {
+      parse_spec 'Usage:'
+    }.to raise_error RuntimeError
+  end
+
+  it 'expects "Usage:" or fails' do
+    expect {
+      parse_spec 'whatever else'
+    }.to raise_error "Expected usage string, got none"
+  end
+
+  it 'chokes when mixing optional and repeated arguments' do
+    expect {
+      parse_spec 'Usage: command [mode] arg files...'
+    }.to raise_error "Cannot combine dotted and optional arguments"
+  end
+
   it 'parses trailing dotted argument' do
     usage = parse_spec 'Usage: upload file type tags...'
     expect(usage.argument_names).to eq({

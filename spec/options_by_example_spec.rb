@@ -254,6 +254,12 @@ describe OptionsByExample do
 
       expect(this.if_present(:timeout) { |val| val * 3 }).to be nil
     end
+
+    it 'fails when block missing' do
+      expect {
+        this.if_present(:timeout)
+      }.to raise_error ArgumentError, "block missing"
+    end
   end
 
   describe "#include?" do
