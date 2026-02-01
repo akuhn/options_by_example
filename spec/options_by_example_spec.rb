@@ -57,7 +57,7 @@ describe OptionsByExample do
     usage = 'Usage: head [-n NUM (default 10)] fname'
     this = OptionsByExample.new(usage).parse(%w{example.md})
 
-    expect(this.argument_n).to eq '10'
+    expect(this.argument_n).to eq 10
     expect(this.argument_fname).to eq 'example.md'
   end
 
@@ -493,24 +493,26 @@ describe OptionsByExample do
 
   describe 'default values' do
 
-    it 'uses default value' do
-      this.parse %w{-v example.com 80}
+    let(:usage_message) { 'Usage: head [--lines NUM (default 10)] files...' }
 
-      expect(this.include_retries?).to be_falsey
-      expect(this.argument_retries).to eq '3'
+    it 'uses default value' do
+      this.parse %w{foo bar}
+
+      expect(this.include_lines?).to be_falsey
+      expect(this.argument_lines).to eq 10
     end
 
     it 'uses given value' do
-      this.parse %w{--retries 5 -v example.com 80}
+      this.parse %w{--lines 5 example}
 
-      expect(this.include_retries?).to be true
-      expect(this.argument_retries).to eq '5'
+      expect(this.include_lines?).to be true
+      expect(this.argument_lines).to eq 5
     end
 
     it 'raises an error for missing argument' do
       expect {
-        this.parse %w{--retries -v example.com 80}
-      }.to output_error "Expected argument for option '--retries', got none"
+        this.parse %w{--lines}
+      }.to output_error "Expected argument for option '--lines', got none"
     end
   end
 

@@ -41,6 +41,7 @@ class OptionsByExample
       expand_dash_number_to_dash_n_option
       raise_if_unknown_options
       parse_options
+      coerce_num_date_time_etc
 
       validate_number_of_arguments
       parse_required_arguments
@@ -114,31 +115,34 @@ class OptionsByExample
 
         if argument_name
           raise "Expected argument for option '#{option}', got none" if args.empty?
-          value = args.shift
-
-          begin
-            case argument_name
-            when 'NUM'
-              expected_type = 'an integer value'
-              value = Integer value
-            when 'DATE'
-              expected_type = 'a date (e.g. YYYY-MM-DD)'
-              value = Date.parse value
-            when 'TIME'
-              expected_type = 'a timestamp (e.g. HH:MM:SS)'
-              value = Time.parse value
-            end
-          rescue ArgumentError
-            raise "Invalid argument \"#{value}\" for option '#{option}', please provide #{expected_type}"
-          end
-
-          @argument_values[option_name] = value
+          @argument_values[option_name] = args.shift
           @option_took_argument = option
         else
           @option_took_argument = nil
         end
 
         @remainder = args
+      end
+    end
+
+    def coerce_num_date_time_etc
+      @option_names.each do |option, (each, argument_name)|
+        next unless value = @argument_values[each]
+        begin
+          case argument_name
+          when 'NUM'
+            expected_type = 'an integer value'
+            @argument_values[each] = Integer value
+          when 'DATE'
+            expected_type = 'a date (e.g. YYYY-MM-DD)'
+            @argument_values[each]  = Date.parse value
+          when 'TIME'
+            expected_type = 'a timestamp (e.g. HH:MM:SS)'
+            @argument_values[each]  = Time.parse value
+          end
+        rescue ArgumentError
+          raise "Invalid argument \"#{value}\" for option '#{option}', please provide #{expected_type}"
+        end
       end
     end
 
