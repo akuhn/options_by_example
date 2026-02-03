@@ -16,7 +16,7 @@ module Helpers
     output(start_with 'Usage:').to_stdout.and exit_with_status(0)
   end
 
-  def output_error(message)
+  def abort_with(message)
     output("ERR: #{message}\n").to_stderr.and exit_with_status(1)
   end
 end

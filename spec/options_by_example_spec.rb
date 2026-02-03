@@ -291,43 +291,43 @@ describe OptionsByExample do
     it 'raises an error for unknown options' do
       expect {
         this.parse %w{--foo example.com 80}
-      }.to output_error "Found unknown option '--foo'"
+      }.to abort_with "Found unknown option '--foo'"
     end
 
     it 'raises an error for missing required arguments' do
       expect {
         this.parse %w{-v example.com}
-      }.to output_error "Expected 2 required arguments, but received only one"
+      }.to abort_with "Expected 2 required arguments, but received only one"
     end
 
     it 'raises an error for missing arguments' do
       expect {
         this.parse %w{--retries -v example.com 80}
-      }.to output_error "Expected argument for option '--retries', got none"
+      }.to abort_with "Expected argument for option '--retries', got none"
     end
 
     it 'raises a helpful error for unexpected arguments' do
       expect {
         this.parse %w{--secure gibberish -v example.com 80}
-      }.to output_error "Unexpected arguments found before option '-v', please provide all options before arguments"
+      }.to abort_with "Unexpected arguments found before option '-v', please provide all options before arguments"
     end
 
     it 'raises a helpful error for options in argument section' do
       expect {
         this.parse %w{example.com 80 -v}
-      }.to output_error "Unexpected arguments found before option '-v', please provide all options before arguments"
+      }.to abort_with "Unexpected arguments found before option '-v', please provide all options before arguments"
     end
 
     it 'raises a helpful error for ambigious missing arguments' do
       expect {
         this.parse %w{--timeout example.com 80}
-      }.to output_error "Expected 2 required arguments, but received only one (considering --timeout takes an argument)"
+      }.to abort_with "Expected 2 required arguments, but received only one (considering --timeout takes an argument)"
     end
 
     it 'raises an error for too many arguments' do
       expect {
         this.parse %w{active example.com 80 gibberish}
-      }.to output_error "Expected 2-3 arguments, but received too many"
+      }.to abort_with "Expected 2-3 arguments, but received too many"
     end
   end
 
@@ -360,31 +360,31 @@ describe OptionsByExample do
     it 'raises an error for unexpected arguments' do
       expect {
         this.parse %w{lorem}
-      }.to output_error "Expected 0 arguments, but received too many"
+      }.to abort_with "Expected 0 arguments, but received too many"
     end
 
     it 'raises an error for unexpected leading argument' do
       expect {
         this.parse %w{lorem --foo}
-      }.to output_error "Unexpected arguments found before option '--foo', please provide all options before arguments"
+      }.to abort_with "Unexpected arguments found before option '--foo', please provide all options before arguments"
     end
 
     it 'raises error for unexpected intermediate argument' do
       expect {
         this.parse %w{--foo lorem --bar}
-      }.to output_error "Unexpected arguments found before option '--bar', please provide all options before arguments"
+      }.to abort_with "Unexpected arguments found before option '--bar', please provide all options before arguments"
     end
 
     it 'raises error for unexpected trailing argument' do
       expect {
         this.parse %w{--foo lorem}
-      }.to output_error "Expected 0 arguments, but received too many"
+      }.to abort_with "Expected 0 arguments, but received too many"
     end
 
     it 'raises an error for unknown options' do
       expect {
         this.parse %w{--foo --qux --bar}
-      }.to output_error "Found unknown option '--qux'"
+      }.to abort_with "Found unknown option '--qux'"
     end
 
     it 'detects help option' do
@@ -414,31 +414,31 @@ describe OptionsByExample do
     it 'raises an error for emtpy ARGV' do
       expect {
         this.parse %w{}
-      }.to output_error "Expected 2 required arguments, but received none"
+      }.to abort_with "Expected 2 required arguments, but received none"
     end
 
     it 'raises an error for missing required argumente' do
       expect {
         this.parse %w{80}
-      }.to output_error "Expected 2 required arguments, but received only one"
+      }.to abort_with "Expected 2 required arguments, but received only one"
     end
 
     it 'raises an error for too many arguments' do
       expect {
         this.parse %w{80 443 5309}
-      }.to output_error "Expected 2 arguments, but received too many"
+      }.to abort_with "Expected 2 arguments, but received too many"
     end
 
     it 'raises an error for unknown options' do
       expect {
         this.parse %w{--verbose 80 443}
-      }.to output_error "Found unknown option '--verbose'"
+      }.to abort_with "Found unknown option '--verbose'"
     end
 
     it 'raises an error for arguments before options' do
       expect {
         this.parse %w{80 443 --verbose}
-      }.to output_error "Found unknown option '--verbose'"
+      }.to abort_with "Found unknown option '--verbose'"
     end
   end
 
@@ -467,13 +467,13 @@ describe OptionsByExample do
     it 'raises an error for unknown stacked shorthands' do
       expect {
         this.parse %w{-svat example.com 443}
-      }.to output_error "Found unknown option -a inside '-svat'"
+      }.to abort_with "Found unknown option -a inside '-svat'"
     end
 
     it 'raises a helpful error for matching longhand option' do
       expect {
         this.parse %w{-verbose example.com 80}
-      }.to output_error "Found unknown option -e inside '-verbose', did you mean '--verbose'?"
+      }.to abort_with "Found unknown option -e inside '-verbose', did you mean '--verbose'?"
     end
   end
 
@@ -512,7 +512,7 @@ describe OptionsByExample do
     it 'raises an error for missing argument' do
       expect {
         this.parse %w{--lines}
-      }.to output_error "Expected argument for option '--lines', got none"
+      }.to abort_with "Expected argument for option '--lines', got none"
     end
   end
 
@@ -546,7 +546,7 @@ describe OptionsByExample do
     it 'raises a helpful error for invalid arguments' do
       expect {
         this.parse %w{--num foo}
-      }.to output_error "Invalid argument \"foo\" for option '--num', please provide an integer value"
+      }.to abort_with "Invalid argument \"foo\" for option '--num', please provide an integer value"
     end
   end
 
@@ -568,7 +568,7 @@ describe OptionsByExample do
       expect {
         this.parse %w{-ab}
         this.expect_at_most_one_except :v, :x
-      }.to output_error "Found more than one mutually-exclusive option {a, b}"
+      }.to abort_with "Found more than one mutually-exclusive option {a, b}"
     end
   end
 end
