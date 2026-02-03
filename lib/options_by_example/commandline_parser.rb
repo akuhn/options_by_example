@@ -167,36 +167,23 @@ class OptionsByExample
     end
 
     def parse_required_arguments
-      if @argument_names.values.include?(:vararg)
-        remaining_arguments = @argument_names.length
-        @argument_names.each do |argument_name, arity|
-          raise "unreachable" if @remainder.empty?
-          remaining_arguments -= 1
-          case arity
-          when :required
-            @argument_values[argument_name] = @remainder.shift
-          when :vararg
-            @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
-          else
-            raise "unreachable"
-          end
+      remaining_arguments = @argument_names.length
+      @argument_names.each do |argument_name, arity|
+        raise %{assertion_error} if @remainder.empty?
+        remaining_arguments -= 1
+        case arity
+        when :required
+          @argument_values[argument_name] = @remainder.shift
+        when :vararg
+          @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
+        else
+          break
         end
-        return
-      end
-
-      @argument_names.reverse_each do |argument_name, arity|
-        break if arity == :optional
-        raise "unreachable" if @remainder.empty?
-        @argument_values[argument_name] = @remainder.pop
       end
     end
 
     def parse_optional_arguments
-      @argument_names.each do |argument_name, arity|
-        break unless arity == :optional
-        break if @remainder.empty?
-        @argument_values[argument_name] = @remainder.shift
-      end
+      # FIXME parse trailing optional arguments
     end
   end
 end
