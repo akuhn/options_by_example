@@ -17,7 +17,7 @@ module Helpers
   end
 
   def output_error(message)
-    output("ERROR: #{message}\n").to_stdout.and exit_with_status(1)
+    output("ERR: #{message}\n").to_stderr.and exit_with_status(1)
   end
 end
 

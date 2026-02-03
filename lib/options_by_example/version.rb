@@ -11,6 +11,10 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
+3.3.1
+  - Ensure default values are coerced too
+  - Print error message to stderr
+
 3.3.0
   - Expand dash-number to dash-n option
   - Complete support for inline specification of options

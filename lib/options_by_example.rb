@@ -28,8 +28,7 @@ class OptionsByExample
     puts @usage_spec.message
     exit 0
   rescue RuntimeError => err
-    puts "ERROR: #{err.message}"
-    exit 1
+    abort "ERR: #{err.message}"
   end
 
   def fetch(*args, &block)
