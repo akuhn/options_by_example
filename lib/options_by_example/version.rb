@@ -13,7 +13,9 @@ __END__
 
 3.3.1
   - Ensure default values are coerced too
-  - Print error message to stderr
+  - Print error message to stdout
+  - New method #expect_at_most_one_except (experimental)
+  - New method #expect_at_most_one_of (experimental)
 
 3.3.0
   - Expand dash-number to dash-n option

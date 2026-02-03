@@ -31,6 +31,17 @@ class OptionsByExample
     abort "ERR: #{err.message}"
   end
 
+  def expect_at_most_one_except(*extra_options)
+    expect_at_most_one_of *(@options.keys - extra_options)
+  end
+
+  def expect_at_most_one_of(*mutually_exclusive_options)
+    provided_options = @options.keys & mutually_exclusive_options
+    if provided_options.length > 1
+      abort "ERR: Found more than one mutually-exclusive option {#{provided_options.join ', '}}"
+    end
+  end
+
   def fetch(*args, &block)
     @arguments.fetch(*args, &block)
   end
