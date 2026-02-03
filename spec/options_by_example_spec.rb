@@ -555,18 +555,18 @@ describe OptionsByExample do
     let(:usage_message) { "Usage: command [-a] [-b] [-c] [-v] [-x]" }
 
     it 'can be given as an exclusive constraint' do
-      this.parse %w{-avx}
+      this.parse %w{-a -v -x}
       this.expect_at_most_one_except :v, :x
     end
 
     it 'can be given as an inclusive constraint' do
-      this.parse %w{-avx}
+      this.parse %w{-a -v -x}
       this.expect_at_most_one_of :a, :b, :c
     end
 
     it 'aborts when more than one is found' do
       expect {
-        this.parse %w{-ab}
+        this.parse %w{-a -b}
         this.expect_at_most_one_except :v, :x
       }.to abort_with "Found more than one mutually-exclusive option {a, b}"
     end
