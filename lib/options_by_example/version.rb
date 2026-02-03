@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '3.3.0'
+  VERSION = '3.4.0'
 end
 
 
@@ -11,7 +11,7 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
-3.3.1
+3.4.0
   - Ensure default values are coerced too
   - Print error message to stdout
   - New method #expect_at_most_one_except (experimental)
