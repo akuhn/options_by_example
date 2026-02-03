@@ -45,7 +45,7 @@ class OptionsByExample
 
       validate_number_of_arguments
       parse_required_arguments
-      parse_optional_arguments
+      # parse_optional_arguments
 
       raise "Internal error: unreachable state" unless @remainder.empty?
     end

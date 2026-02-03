@@ -34,10 +34,10 @@ class OptionsByExample
         tokens.shift
       end
 
-      while /^\[(\w+)\]$/ === tokens.first
-        @argument_names[sanitize $1] = :optional
-        tokens.shift
-      end
+      # while /^\[(\w+)\]$/ === tokens.first
+      #   @argument_names[sanitize $1] = :optional
+      #   tokens.shift
+      # end
 
       while /^(\w+)( ?\.\.\.)?$/ === tokens.first
         vararg_if_dotted = $2 ? :vararg : :required

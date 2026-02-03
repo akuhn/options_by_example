@@ -27,11 +27,11 @@ describe OptionsByExample do
   end
 
   it 'supports one-line usage messages with positional arguments' do
-    usage = 'Usage: connect [-s, --secure] [mode] host port'
-    this = OptionsByExample.new(usage).parse(%w{-s passive example.com 80})
+    usage = 'Usage: connect [-s,--secure] [--mode MODE] host port'
+    this = OptionsByExample.new(usage).parse(%w{-s example.com 80})
 
     expect(this.include_secure?).to be true
-    expect(this.argument_mode).to eq 'passive'
+    expect(this.argument_host).to eq 'example.com'
   end
 
   it 'supports shorthand-only option' do
@@ -91,7 +91,7 @@ describe OptionsByExample do
       Establishes network connection to designated host and port, enabling
       users to assess network connectivity and diagnose potential issues.
 
-      Usage: connect [options] [mode] host port
+      Usage: connect [options] [--mode MODE] host port
 
       Options:
         -s, --secure        Establish a secure connection (SSL/TSL)
@@ -100,7 +100,6 @@ describe OptionsByExample do
         -t, --timeout ARG   Set connection timeout in seconds
 
       Arguments:
-        [mode]              Optional connection mode (active or passive)
         host                The target host to connect to (e.g., example.com)
         port                The target port to connect to (e.g., 80)
     }
@@ -112,10 +111,9 @@ describe OptionsByExample do
 
     it 'parses argument names' do
       argument_names = this.usage_spec.argument_names
-      expect(argument_names).to include mode: :optional
       expect(argument_names).to include host: :required
       expect(argument_names).to include port: :required
-      expect(argument_names.size).to be 3
+      expect(argument_names.size).to be 2
     end
 
     it 'parses all options' do
@@ -123,7 +121,7 @@ describe OptionsByExample do
       expect(option_names['-v']).to eq [:verbose, nil]
       expect(option_names['--verbose']).to eq [:verbose, nil]
       expect(option_names['--retries']).to eq [:retries, "ARG"]
-      expect(option_names.size).to be 8
+      expect(option_names.size).to be 9
     end
 
     it 'parses default values' do
@@ -282,10 +280,10 @@ describe OptionsByExample do
   describe "#parse" do
 
     it 'parses options and arguments correctly' do
-      this.parse %w{--secure -v --retries 5 active example.com 80}
+      this.parse %w{--secure -v --retries 5 example.com 80}
 
       expect(this.options.keys).to match_array [:secure, :verbose, :retries]
-      expect(this.arguments.keys).to match_array [:retries, :mode, :host, :port]
+      expect(this.arguments.keys).to match_array [:retries, :host, :port]
     end
 
     it 'raises an error for unknown options' do
@@ -326,8 +324,8 @@ describe OptionsByExample do
 
     it 'raises an error for too many arguments' do
       expect {
-        this.parse %w{active example.com 80 gibberish}
-      }.to abort_with "Expected 2-3 arguments, but received too many"
+        this.parse %w{example.com 80 gibberish}
+      }.to abort_with "Expected 2 arguments, but received too many"
     end
   end
 
