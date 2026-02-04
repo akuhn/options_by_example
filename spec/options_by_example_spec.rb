@@ -61,31 +61,6 @@ describe OptionsByExample do
     expect(this.argument_fname).to eq 'example.md'
   end
 
-  it 'supports trailing vararg arguments' do
-    usage = 'Usage: archive zipfile files...'
-    this = OptionsByExample.new(usage).parse(%w{example foo bar})
-
-    expect(this.argument_zipfile).to eq 'example'
-    expect(this.argument_files).to eq ['foo', 'bar']
-  end
-
-  it 'supports leading vararg arguments' do
-    usage = 'Usage: join sources... dest'
-    this = OptionsByExample.new(usage).parse(%w{foo bar example})
-
-    expect(this.argument_sources).to eq ['foo', 'bar']
-    expect(this.argument_dest).to eq 'example'
-  end
-
-  it 'handles repeated argument in the middle of three arguments' do
-    usage = 'Usage: convert input files... format'
-    this = OptionsByExample.new(usage).parse(%w{foo bar baz qux jpeg})
-
-    expect(this.argument_input).to eq 'foo'
-    expect(this.argument_files).to eq ['bar', 'baz', 'qux']
-    expect(this.argument_format).to eq 'jpeg'
-  end
-
   let(:usage_message) {
     %{
       Establishes network connection to designated host and port, enabling
@@ -294,12 +269,6 @@ describe OptionsByExample do
       }.to abort_with "Found unknown option '--foo'"
     end
 
-    it 'raises an error for missing required arguments' do
-      expect {
-        this.parse %w{-v example.com}
-      }.to abort_with "Expected 2-3 arguments, but received only one"
-    end
-
     it 'raises an error for missing arguments' do
       expect {
         this.parse %w{--retries -v example.com 80}
@@ -397,6 +366,35 @@ describe OptionsByExample do
       expect {
         this.parse %w{-h debug!}
       }.to output(start_with '@argument_names =').to_stdout.and exit_with_status(0)
+    end
+  end
+
+  describe "parsing three arguments" do
+
+    let(:usage_message) { "Usage: mv source target backup" }
+
+    it 'fails when one argument' do
+      expect {
+        this.parse %w{one}
+      }.to abort_with "Expected 3 arguments, but received only one"
+    end
+
+    it 'fails when two arguments' do
+      expect {
+        this.parse %w{one two}
+      }.to abort_with "Expected 3 arguments, but received too few"
+    end
+
+    it 'passes with three arguments' do
+      this.parse %w{one two three}
+
+      expect(this.arguments.length).to be 3
+    end
+
+    it 'fails when four argument' do
+      expect {
+        this.parse %w{one two three four}
+      }.to abort_with "Expected 3 arguments, but received too many"
     end
   end
 
@@ -607,6 +605,41 @@ describe OptionsByExample do
       expect {
         this.parse %w{the quick fox jumps over the lazy dog}
       }.to abort_with "Expected 2-5 arguments, but received too many"
+    end
+  end
+
+  describe 'dot-dot-dot arguments' do
+
+    let(:usage_message) { "Usage: zip archive files..." }
+
+    it 'supports trailing vararg arguments' do
+      this.parse(%w{example.zip foo bar})
+
+      expect(this.argument_archive).to eq 'example.zip'
+      expect(this.argument_files).to eq ['foo', 'bar']
+    end
+
+    it 'expects at least on repeated value' do
+      expect {
+        this.parse(%w{example.zip})
+      }.to abort_with 'Expected 2 or more arguments, but received only one'
+    end
+
+    it 'supports leading vararg arguments' do
+      usage = 'Usage: join sources... dest'
+      this = OptionsByExample.new(usage).parse(%w{foo bar example})
+
+      expect(this.argument_sources).to eq ['foo', 'bar']
+      expect(this.argument_dest).to eq 'example'
+    end
+
+    it 'handles repeated argument in the middle of three arguments' do
+      usage = 'Usage: convert input files... format'
+      this = OptionsByExample.new(usage).parse(%w{foo bar baz qux jpeg})
+
+      expect(this.argument_input).to eq 'foo'
+      expect(this.argument_files).to eq ['bar', 'baz', 'qux']
+      expect(this.argument_format).to eq 'jpeg'
     end
   end
 end

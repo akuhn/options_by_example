@@ -46,7 +46,9 @@ class OptionsByExample
       validate_number_of_arguments
       parse_positional_arguments
 
-      raise "Internal error: unreachable state" unless @remainder.empty?
+      # :nocov:
+      raise %{unreachable given we check number of arguments} unless @remainder.empty?
+      # :nocov:
     end
 
     private
@@ -180,6 +182,10 @@ class OptionsByExample
           msg += " but received too few"
         elsif max_length && @remainder.size > max_length
           msg += " but received too many"
+        # :nocov:
+        else
+          raise %{unreachable given the range check above}
+        # :nocov:
         end
 
         if @option_took_argument
@@ -202,6 +208,10 @@ class OptionsByExample
         when :optional
           break if @remainder.empty?
           @argument_values[argument_name] = @remainder.shift
+        # :nocov:
+        else
+          raise %{unreachable given these are all possible values}
+        # :nocov:
         end
       end
     end
