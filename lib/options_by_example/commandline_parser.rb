@@ -44,8 +44,7 @@ class OptionsByExample
       coerce_num_date_time_etc
 
       validate_number_of_arguments
-      parse_required_arguments
-      # parse_optional_arguments
+      parse_positional_arguments
 
       raise "Internal error: unreachable state" unless @remainder.empty?
     end
@@ -147,43 +146,52 @@ class OptionsByExample
     end
 
     def validate_number_of_arguments
-      count_optional_arguments = @argument_names.values.count(:optional)
-      count_required_arguments = @argument_names.values.count(:required)
+      # Recall that dotted (ie vararg) and optional arguments are mutally-
+      # exclusive, otherwise the follow code does not make sense
+
       count_vararg_arguments = @argument_names.values.count(:vararg)
+      count_required_arguments = @argument_names.values.count(:required)
+      count_optional_arguments = @argument_names.values.count(:optional)
 
       min_length = count_required_arguments + count_vararg_arguments
-      max_length = count_required_arguments + count_optional_arguments
+      max_length = min_length + count_optional_arguments
 
-      if @remainder.size > max_length && count_vararg_arguments == 0
-        range = [min_length, max_length].uniq.join(?-)
-        raise "Expected #{range} arguments, but received too many"
+      if count_vararg_arguments > 0
+        expectation = "Expected #{min_length}+ arguments"
+      elsif count_optional_arguments > 0
+        expectation = "Expected #{min_length}-#{max_length} arguments"
+      else
+        raise %{assertion} unless min_length == max_length
+        expectation = "Expected #{max_length} arguments"
       end
 
       if @remainder.size < min_length
         too_few = @remainder.empty? ? 'none' : (@remainder.size == 1 ? 'only one' : 'too few')
         remark = " (considering #{@option_took_argument} takes an argument)" if @option_took_argument
-        raise "Expected #{min_length} required arguments, but received #{too_few}#{remark}"
+        raise "#{expectation}, but received #{too_few}#{remark}"
+      end
+
+      return if count_vararg_arguments > 0
+
+      if @remainder.size > max_length
+        raise "#{expectation}, but received too many"
       end
     end
 
-    def parse_required_arguments
+    def parse_positional_arguments
       remaining_arguments = @argument_names.length
       @argument_names.each do |argument_name, arity|
-        raise %{assertion_error} if @remainder.empty?
         remaining_arguments -= 1
         case arity
         when :required
           @argument_values[argument_name] = @remainder.shift
         when :vararg
           @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
-        else
-          break
+        when :optional
+          break if @remainder.empty?
+          @argument_values[argument_name] = @remainder.shift
         end
       end
-    end
-
-    def parse_optional_arguments
-      # FIXME parse trailing optional arguments
     end
   end
 end

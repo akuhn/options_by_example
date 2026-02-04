@@ -11,6 +11,10 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
+4.0.0
+  - Remove support for leading optional arguments (breaking change)
+  - Add support for trailing optional arguments
+
 3.4.0
   - Ensure default values are coerced too
   - Print error message to stdout

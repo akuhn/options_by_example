@@ -27,11 +27,11 @@ describe OptionsByExample do
   end
 
   it 'supports one-line usage messages with positional arguments' do
-    usage = 'Usage: connect [-s,--secure] [--mode MODE] host port'
-    this = OptionsByExample.new(usage).parse(%w{-s example.com 80})
+    usage = 'Usage: connect [-s,--secure] host port [mode]'
+    this = OptionsByExample.new(usage).parse(%w{-s example.com 80 passive})
 
     expect(this.include_secure?).to be true
-    expect(this.argument_host).to eq 'example.com'
+    expect(this.argument_mode).to eq 'passive'
   end
 
   it 'supports shorthand-only option' do
@@ -91,7 +91,7 @@ describe OptionsByExample do
       Establishes network connection to designated host and port, enabling
       users to assess network connectivity and diagnose potential issues.
 
-      Usage: connect [options] [--mode MODE] host port
+      Usage: connect [options] host port [mode]
 
       Options:
         -s, --secure        Establish a secure connection (SSL/TSL)
@@ -100,6 +100,7 @@ describe OptionsByExample do
         -t, --timeout ARG   Set connection timeout in seconds
 
       Arguments:
+        [mode]              Optional connection mode (active or passive)
         host                The target host to connect to (e.g., example.com)
         port                The target port to connect to (e.g., 80)
     }
@@ -113,7 +114,8 @@ describe OptionsByExample do
       argument_names = this.usage_spec.argument_names
       expect(argument_names).to include host: :required
       expect(argument_names).to include port: :required
-      expect(argument_names.size).to be 2
+      expect(argument_names).to include mode: :optional
+      expect(argument_names.size).to be 3
     end
 
     it 'parses all options' do
@@ -121,7 +123,7 @@ describe OptionsByExample do
       expect(option_names['-v']).to eq [:verbose, nil]
       expect(option_names['--verbose']).to eq [:verbose, nil]
       expect(option_names['--retries']).to eq [:retries, "ARG"]
-      expect(option_names.size).to be 9
+      expect(option_names.size).to be 8
     end
 
     it 'parses default values' do
@@ -295,7 +297,7 @@ describe OptionsByExample do
     it 'raises an error for missing required arguments' do
       expect {
         this.parse %w{-v example.com}
-      }.to abort_with "Expected 2 required arguments, but received only one"
+      }.to abort_with "Expected 2-3 arguments, but received only one"
     end
 
     it 'raises an error for missing arguments' do
@@ -319,13 +321,13 @@ describe OptionsByExample do
     it 'raises a helpful error for ambigious missing arguments' do
       expect {
         this.parse %w{--timeout example.com 80}
-      }.to abort_with "Expected 2 required arguments, but received only one (considering --timeout takes an argument)"
+      }.to abort_with "Expected 2-3 arguments, but received only one (considering --timeout takes an argument)"
     end
 
     it 'raises an error for too many arguments' do
       expect {
-        this.parse %w{example.com 80 gibberish}
-      }.to abort_with "Expected 2 arguments, but received too many"
+        this.parse %w{example.com 80 passive gibberish}
+      }.to abort_with "Expected 2-3 arguments, but received too many"
     end
   end
 
@@ -412,13 +414,13 @@ describe OptionsByExample do
     it 'raises an error for emtpy ARGV' do
       expect {
         this.parse %w{}
-      }.to abort_with "Expected 2 required arguments, but received none"
+      }.to abort_with "Expected 2 arguments, but received none"
     end
 
     it 'raises an error for missing required argumente' do
       expect {
         this.parse %w{80}
-      }.to abort_with "Expected 2 required arguments, but received only one"
+      }.to abort_with "Expected 2 arguments, but received only one"
     end
 
     it 'raises an error for too many arguments' do
@@ -567,6 +569,44 @@ describe OptionsByExample do
         this.parse %w{-a -b}
         this.expect_at_most_one_except :v, :x
       }.to abort_with "Found more than one mutually-exclusive option {a, b}"
+    end
+  end
+
+  describe 'optional arguments' do
+
+    let(:usage_message) { "Usage: schedule date time [title] [duration] [location]" }
+
+    it 'should be, well, optional' do
+      this.parse %w{today afternoon}
+
+      expect(this.argument_date).to eq "today"
+      expect(this.argument_time).to eq "afternoon"
+    end
+
+    it 'pass when all are provided' do
+      this.parse %w{today afternoon meeting 30min office}
+
+      expect(this.argument_location).to eq "office"
+      expect(this.arguments.length).to eq 5
+    end
+
+    it 'pass when only some are provided' do
+      this.parse %w{today afternoon meeting}
+
+      expect(this.argument_title).to eq "meeting"
+      expect(this.arguments.length).to eq 3
+    end
+
+    it 'fails when required arguments are missing' do
+      expect {
+        this.parse %w{today} # not quite the Schelling point, it seems
+      }.to abort_with "Expected 2-5 arguments, but received only one"
+    end
+
+    it 'chokes when to many arguments are provided' do
+      expect {
+        this.parse %w{the quick fox jumps over the lazy dog}
+      }.to abort_with "Expected 2-5 arguments, but received too many"
     end
   end
 end

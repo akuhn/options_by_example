@@ -39,9 +39,9 @@ describe 'UsageSpecification' do
     }.to raise_error "Expected usage string, got none"
   end
 
-  xit 'chokes when mixing optional and repeated arguments' do
+  it 'chokes when mixing optional and repeated arguments' do
     expect {
-      parse_spec 'Usage: command [mode] arg files...'
+      parse_spec 'Usage: command arg files... [mode]'
     }.to raise_error "Cannot combine dotted and optional arguments"
   end
 

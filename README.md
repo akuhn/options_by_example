@@ -45,7 +45,7 @@ __END__
 Establishes a network connection to a designated host and port, enabling
 users to assess network connectivity and diagnose potential problems.
 
-Usage: connect [options] [mode] host port
+Usage: connect [options] host port [mode]
 
 Options:
   -s, --secure        Establish a secure connection (SSL/TSL)
@@ -54,8 +54,8 @@ Options:
   -t, --timeout NUM   Set connection timeout in seconds
 
 Arguments:
-  [mode]              Optional connection mode (active or passive)
   host                The target host to connect to (e.g., example.com)
   port                The target port to connect to (e.g., 80)
+  [mode]              Optional connection mode (active or passive)
 ```
 
