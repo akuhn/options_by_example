@@ -387,10 +387,16 @@ describe OptionsByExample do
       }.to abort_with "Found unknown option '--qux'"
     end
 
-    it 'detects help option' do
+    it 'prints usage when help option is given' do
       expect {
         this.parse %w{--foo --help --bar}
-      }.to output_usage_message_and_exit
+      }.to output(start_with 'Usage:').to_stdout.and exit_with_status(0)
+    end
+
+    it 'prints diagnostics when undocument password is given' do
+      expect {
+        this.parse %w{-h debug!}
+      }.to output(start_with '@argument_names =').to_stdout.and exit_with_status(0)
     end
   end
 
@@ -403,12 +409,6 @@ describe OptionsByExample do
 
       expect(this.options.keys).to be_empty
       expect(this.arguments.keys).to match_array [:source, :dest]
-    end
-
-    it 'parses help option' do
-      expect {
-        this.parse %w{--foo --bar whatever --help}
-      }.to output_usage_message_and_exit
     end
 
     it 'raises an error for emtpy ARGV' do

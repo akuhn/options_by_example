@@ -12,10 +12,6 @@ module Helpers
     raise_error(SystemExit) { |err| expect(err.status).to eq code }
   end
 
-  def output_usage_message_and_exit
-    output(start_with 'Usage:').to_stdout.and exit_with_status(0)
-  end
-
   def abort_with(message)
     output("ERR: #{message}\n").to_stderr.and exit_with_status(1)
   end

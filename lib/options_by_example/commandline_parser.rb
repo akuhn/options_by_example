@@ -36,7 +36,7 @@ class OptionsByExample
         current << each
       end
 
-      raise_if_help_option
+      exit_if_help_option
       unpack_combined_shorthand_options
       expand_dash_number_to_dash_n_option
       raise_if_unknown_options
@@ -51,10 +51,15 @@ class OptionsByExample
 
     private
 
-    def raise_if_help_option
+    def exit_if_help_option
       @slices.each do |option, *args|
         case option
         when '-h', '--help'
+          if args.first == 'debug!'
+            puts "@argument_names = #{@argument_names.inspect}"
+            puts "@default_values = #{@default_values.inspect}"
+            puts "@option_names = #{@option_names.inspect}"
+          end
           raise PrintUsageMessage
         end
       end
