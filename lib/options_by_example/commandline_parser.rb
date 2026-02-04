@@ -146,35 +146,42 @@ class OptionsByExample
     end
 
     def validate_number_of_arguments
-      # Recall that dotted (ie vararg) and optional arguments are mutally-
-      # exclusive, otherwise the follow code does not make sense
+      # ASSUME: either varargs or optional arguments, never both. That
+      # constraint is guaranteed upstream. Here, we just count
 
-      count_vararg_arguments = @argument_names.values.count(:vararg)
-      count_required_arguments = @argument_names.values.count(:required)
-      count_optional_arguments = @argument_names.values.count(:optional)
+      count_required = @argument_names.values.count(:required)
+      count_vararg = @argument_names.values.count(:vararg)
+      count_optional = @argument_names.values.count(:optional)
 
-      min_length = count_required_arguments + count_vararg_arguments
-      max_length = min_length + count_optional_arguments
+      min_length = count_required + count_vararg
+      max_length = count_required + count_optional
+      max_length = nil if count_vararg > 0
 
-      if count_vararg_arguments > 0
-        expectation = "Expected #{min_length}+ arguments"
-      elsif count_optional_arguments > 0
-        expectation = "Expected #{min_length}-#{max_length} arguments"
-      else
-        raise %{assertion} unless min_length == max_length
-        expectation = "Expected #{max_length} arguments"
-      end
+      unless (min_length..max_length) === @remainder.size
 
-      if @remainder.size < min_length
-        too_few = @remainder.empty? ? 'none' : (@remainder.size == 1 ? 'only one' : 'too few')
-        remark = " (considering #{@option_took_argument} takes an argument)" if @option_took_argument
-        raise "#{expectation}, but received #{too_few}#{remark}"
-      end
+        if max_length.nil?
+          msg = "Expected #{min_length} or more arguments,"
+        elsif max_length > min_length
+          msg = "Expected #{min_length}-#{max_length} arguments,"
+        else
+          msg = "Expected #{min_length} arguments,"
+        end
 
-      return if count_vararg_arguments > 0
+        if @remainder.empty?
+          msg += " but received none"
+        elsif @remainder.size == 1 && min_length > 1
+          msg += " but received only one"
+        elsif @remainder.size < min_length
+          msg += " but received too few"
+        elsif max_length && @remainder.size > max_length
+          msg += " but received too many"
+        end
 
-      if @remainder.size > max_length
-        raise "#{expectation}, but received too many"
+        if @option_took_argument
+          msg += " (considering #{@option_took_argument} takes an argument)"
+        end
+
+        raise msg
       end
     end
 
