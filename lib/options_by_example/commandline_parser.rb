@@ -17,6 +17,7 @@ class OptionsByExample
     def initialize(usage)
       @argument_names = usage.argument_names
       @default_values = usage.default_values
+      @ends_with_optional_vararg = usage.ends_with_optional_vararg
       @option_names = usage.option_names
 
       @argument_values = @default_values.dup
@@ -45,6 +46,7 @@ class OptionsByExample
 
       validate_number_of_arguments
       parse_positional_arguments
+      special_case_if_ends_with_optional_vararg
 
       # :nocov:
       raise %{unreachable given we check number of arguments} unless @remainder.empty?
@@ -60,6 +62,7 @@ class OptionsByExample
           if args.first == 'debug!'
             puts "@argument_names = #{@argument_names.inspect}"
             puts "@default_values = #{@default_values.inspect}"
+            puts "@ends_with_optional_vararg = #{@ends_with_optional_vararg}"
             puts "@option_names = #{@option_names.inspect}"
           end
           raise PrintUsageMessage
@@ -162,6 +165,7 @@ class OptionsByExample
 
       min_length = count_required + count_vararg
       max_length = count_required + count_optional
+      max_length = nil if @ends_with_optional_vararg
       max_length = nil if count_vararg > 0
 
       unless (min_length..max_length) === @remainder.size
@@ -214,6 +218,15 @@ class OptionsByExample
         # :nocov:
         end
       end
+    end
+
+    def special_case_if_ends_with_optional_vararg
+      return unless @ends_with_optional_vararg
+      final_argument_name = @argument_names.keys.last
+      @argument_values[final_argument_name] = [
+        *@argument_values[final_argument_name],
+        *@remainder.shift(@remainder.length),
+      ]
     end
   end
 end

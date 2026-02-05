@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '3.4.0'
+  VERSION = '4.0.0'
 end
 
 
@@ -14,6 +14,7 @@ __END__
 4.0.0
   - Remove support for leading optional arguments (breaking change)
   - Add support for trailing optional arguments
+  - Add support for optional vararg argument
 
 3.4.0
   - Ensure default values are coerced too

@@ -642,5 +642,36 @@ describe OptionsByExample do
       expect(this.argument_format).to eq 'jpeg'
     end
   end
+
+  describe 'optional dot-dot-dot argument' do
+
+    let(:usage_message) { "Usage: connect host port [mode] [files...]" }
+
+    it 'works with three values' do
+      this.parse %w{example.org 80 active one two three}
+      expect(this.argument_files).to eq ["one", "two", "three"]
+    end
+
+    it 'works with one value' do
+      this.parse %w{example.org 80 active fname}
+      expect(this.argument_files).to eq ["fname"]
+    end
+
+    it 'works without value' do
+      this.parse %w{example.org 80 active}
+      expect(this.argument_files).to eq []
+    end
+
+    it 'works with even less values' do
+      this.parse %w{example.org 80}
+      expect(this.argument_files).to eq []
+    end
+
+    it 'fails when not enough arguments' do
+      expect {
+        this.parse %w{gibberish}
+      }.to abort_with 'Expected 2 or more arguments, but received only one'
+    end
+  end
 end
 

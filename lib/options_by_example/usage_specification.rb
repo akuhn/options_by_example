@@ -7,6 +7,7 @@ class OptionsByExample
     attr_reader :message
     attr_reader :argument_names
     attr_reader :default_values
+    attr_reader :ends_with_optional_vararg
     attr_reader :option_names
 
     def initialize(text)
@@ -42,6 +43,12 @@ class OptionsByExample
 
       while /^\[(\w+)\]$/ === tokens.first
         @argument_names[sanitize $1] = :optional
+        tokens.shift
+      end
+
+      if /^\[(\w+) ?\.\.\.\]$/ === tokens.first
+        @argument_names[sanitize $1] = :optional
+        @ends_with_optional_vararg = true
         tokens.shift
       end
 
