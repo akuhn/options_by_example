@@ -6,7 +6,6 @@ class OptionsByExample
 
     attr_reader :message
     attr_reader :argument_names
-    attr_reader :default_values
     attr_reader :ends_with_optional_vararg
     attr_reader :option_names
 
@@ -72,7 +71,6 @@ class OptionsByExample
       #   -t, --timeout NUM   Set connection timeout in seconds
 
       @option_names = {}
-      @default_values = {}
 
       options = inline_options + text.lines.grep(/^\s*--?\w/)
       options.each do |string|
@@ -99,11 +97,10 @@ class OptionsByExample
           default_value = $1
         end
 
-        [short_form, long_form].compact.each do |each|
-          @option_names[each] = [option_name, argument_name]
+        ary = [option_name, argument_name, default_value]
+        [short_form, long_form].each do |each|
+          @option_names[each] = ary if each
         end
-
-        @default_values[option_name] = default_value if default_value
       end
     end
 

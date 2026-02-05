@@ -16,11 +16,10 @@ class OptionsByExample
 
     def initialize(usage)
       @argument_names = usage.argument_names
-      @default_values = usage.default_values
       @ends_with_optional_vararg = usage.ends_with_optional_vararg
       @option_names = usage.option_names
 
-      @argument_values = @default_values.dup
+      @argument_values = {}
       @option_values = {}
     end
 
@@ -61,7 +60,6 @@ class OptionsByExample
         when '-h', '--help'
           if args.first == 'debug!'
             puts "@argument_names = #{@argument_names.inspect}"
-            puts "@default_values = #{@default_values.inspect}"
             puts "@ends_with_optional_vararg = #{@ends_with_optional_vararg}"
             puts "@option_names = #{@option_names.inspect}"
           end
@@ -119,10 +117,10 @@ class OptionsByExample
           raise "Unexpected arguments found before option '#{option}', please provide all options before arguments"
         end
 
-        option_name, argument_name = @option_names[option]
+        option_name, has_argument, ___ = @option_names[option]
         @option_values[option_name] = true
 
-        if argument_name
+        if has_argument
           raise "Expected argument for option '#{option}', got none" if args.empty?
           @argument_values[option_name] = args.shift
           @option_took_argument = option
@@ -135,23 +133,27 @@ class OptionsByExample
     end
 
     def coerce_num_date_time_etc
-      @option_names.each do |option, (each, argument_name)|
-        next unless value = @argument_values[each]
+      @option_names.each do |option, (each, argument_name, default_value)|
+        value = @argument_values.fetch(each, default_value)
+        next unless value
+
         begin
           case argument_name
           when 'NUM'
             expected_type = 'an integer value'
-            @argument_values[each] = Integer value
+            value = Integer value
           when 'DATE'
             expected_type = 'a date (e.g. YYYY-MM-DD)'
-            @argument_values[each]  = Date.parse value
+            value = Date.parse value
           when 'TIME'
             expected_type = 'a timestamp (e.g. HH:MM:SS)'
-            @argument_values[each]  = Time.parse value
+            value = Time.parse value
           end
         rescue ArgumentError
           raise "Invalid argument \"#{value}\" for option '#{option}', please provide #{expected_type}"
         end
+
+        @argument_values[each] = value
       end
     end
 

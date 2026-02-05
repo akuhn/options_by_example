@@ -95,16 +95,10 @@ describe OptionsByExample do
 
     it 'parses all options' do
       option_names = this.usage_spec.option_names
-      expect(option_names['-v']).to eq [:verbose, nil]
-      expect(option_names['--verbose']).to eq [:verbose, nil]
-      expect(option_names['--retries']).to eq [:retries, "ARG"]
+      expect(option_names['-v']).to eq [:verbose, nil, nil]
+      expect(option_names['--verbose']).to eq [:verbose, nil, nil]
+      expect(option_names['--retries']).to eq [:retries, "ARG", "3"]
       expect(option_names.size).to be 8
-    end
-
-    it 'parses default values' do
-      default_values = this.usage_spec.default_values
-      expect(default_values[:retries]).to eq "3"
-      expect(default_values.size).to be 1
     end
   end
 
@@ -128,6 +122,11 @@ describe OptionsByExample do
       expect(this).to respond_to :argument_timeout
     end
 
+    it 'does not respond to options without argument' do
+      expect(this).to respond_to :include_secure?
+      expect(this).to_not respond_to :argument_secure
+    end
+
     it 'supports dash in option names' do
       usage = 'Usage: $0 [--find-matches] [--enable-feature NAME]'
       this = OptionsByExample.new(usage)
@@ -137,7 +136,7 @@ describe OptionsByExample do
       expect(this).to respond_to :argument_enable_feature
     end
 
-    it 'supports dash in argument names' do
+    it 'supports underscore in argument names' do
       usage = 'Usage: $0 [options] BLOCK_NUMBER'
       this = OptionsByExample.new(usage)
 

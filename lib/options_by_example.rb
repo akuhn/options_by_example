@@ -76,7 +76,9 @@ class OptionsByExample
   def initialize_argument_accessors
     [
       *@usage_spec.argument_names.keys,
-      *@usage_spec.option_names.values.select(&:last).map(&:first),
+      *@usage_spec.option_names.values
+        .map { |option_name, has_argument| option_name if has_argument }
+        .compact,
     ].each do |argument_name|
       instance_eval %{
         def argument_#{argument_name}
