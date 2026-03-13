@@ -33,6 +33,12 @@ describe 'UsageSpecification' do
     }.to raise_error RuntimeError
   end
 
+  it 'reports a helpful error when usage is split across lines' do
+    expect {
+      parse_spec "Usage:\n command [options] arg"
+    }.to raise_error "Expected command name on same line as 'Usage:'"
+  end
+
   it 'expects "Usage:" or fails' do
     expect {
       parse_spec 'whatever else'
@@ -88,4 +94,3 @@ describe 'UsageSpecification' do
     expect(usage.argument_names).to eq items: :vararg
   end
 end
-
