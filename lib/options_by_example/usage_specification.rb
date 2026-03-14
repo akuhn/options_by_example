@@ -6,7 +6,6 @@ class OptionsByExample
 
     attr_reader :message
     attr_reader :argument_names
-    attr_reader :ends_with_optional_vararg
     attr_reader :option_names
 
     def initialize(text)
@@ -46,18 +45,19 @@ class OptionsByExample
       end
 
       if /^\[(\w+) ?\.\.\.\]$/ === tokens.first
-        @argument_names[sanitize $1] = :optional
-        @ends_with_optional_vararg = true
+        @argument_names[sanitize $1] = :optional_vararg
         tokens.shift
       end
 
       raise "Found invalid usage token '#{tokens.first}'" unless tokens.empty?
 
-      count_optional_arguments = @argument_names.values.count(:optional)
-      count_vararg_arguments = @argument_names.values.count(:vararg)
+      if count_arguments(:vararg) > 0 && count_arguments(/optional/) > 0
+        raise "Cannot combine dotted and optional arguments"
+      end
 
-      raise "Cannot combine dotted and optional arguments" if count_optional_arguments > 0 && count_vararg_arguments > 0
-      raise "Found more than one dotted arguments" if count_vararg_arguments > 1
+      if count_arguments(/vararg/) > 1
+        raise "Found more than one dotted arguments"
+      end
 
       # --- 2) Parse option names ---------------------------------------
       #
@@ -108,6 +108,10 @@ class OptionsByExample
 
     def sanitize(string)
       string.tr('^a-zA-Z0-9', '_').downcase.to_sym
+    end
+
+    def count_arguments(pattern)
+      @argument_names.values.grep(pattern).count
     end
   end
 end

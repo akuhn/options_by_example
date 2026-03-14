@@ -93,4 +93,32 @@ describe 'UsageSpecification' do
     usage = parse_spec 'Usage: print items...'
     expect(usage.argument_names).to eq items: :vararg
   end
+
+  it 'parses only optional dotted argument' do
+    usage = parse_spec 'Usage: print [items...]'
+    expect(usage.argument_names).to eq items: :optional_vararg
+  end
+
+  it 'parses optional dotted argument' do
+    usage = parse_spec 'Usage: connect host port [mode] [files...]'
+
+    expect(usage.argument_names).to eq({
+      host: :required,
+      port: :required,
+      mode: :optional,
+      files: :optional_vararg,
+    })
+  end
+
+  it 'chokes when optional dotted argument is not trailing' do
+    expect {
+      parse_spec 'Usage: print [items...] [mode]'
+    }.to raise_error "Found invalid usage token '[mode]'" # FIXME better message
+  end
+
+  it 'chokes when mixing dotted and optional dotted arguments' do
+    expect {
+      parse_spec 'Usage: print items... [more...]'
+    }.to raise_error "Cannot combine dotted and optional arguments"
+  end
 end

@@ -666,11 +666,32 @@ describe OptionsByExample do
       expect(this.argument_files).to eq []
     end
 
+    it 'prefers optional argument before optional dotted argument' do
+      this.parse %w{example.org 80 alpha beta}
+
+      expect(this.argument_mode).to eq 'alpha'
+      expect(this.argument_files).to eq ['beta']
+    end
+
     it 'fails when not enough arguments' do
       expect {
         this.parse %w{gibberish}
       }.to abort_with 'Expected 2 or more arguments, but received only one'
     end
   end
-end
 
+  describe 'optional-only dot-dot-dot argument' do
+
+    let(:usage_message) { "Usage: collect [items...]" }
+
+    it 'works without values' do
+      this.parse []
+      expect(this.argument_items).to eq []
+    end
+
+    it 'works with multiple values' do
+      this.parse %w{red green blue}
+      expect(this.argument_items).to eq %w{red green blue}
+    end
+  end
+end

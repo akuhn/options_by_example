@@ -16,7 +16,6 @@ class OptionsByExample
 
     def initialize(usage)
       @argument_names = usage.argument_names
-      @ends_with_optional_vararg = usage.ends_with_optional_vararg
       @option_names = usage.option_names
 
       @argument_values = {}
@@ -45,7 +44,6 @@ class OptionsByExample
 
       validate_number_of_arguments
       parse_positional_arguments
-      special_case_if_ends_with_optional_vararg
 
       # :nocov:
       raise %{unreachable given we check number of arguments} unless @remainder.empty?
@@ -60,7 +58,6 @@ class OptionsByExample
         when '-h', '--help'
           if args.first == 'debug!'
             puts "@argument_names = #{@argument_names.inspect}"
-            puts "@ends_with_optional_vararg = #{@ends_with_optional_vararg}"
             puts "@option_names = #{@option_names.inspect}"
           end
           raise PrintUsageMessage
@@ -161,14 +158,9 @@ class OptionsByExample
       # ASSUME: either varargs or optional arguments, never both. That
       # constraint is guaranteed upstream. Here, we just count
 
-      count_required = @argument_names.values.count(:required)
-      count_vararg = @argument_names.values.count(:vararg)
-      count_optional = @argument_names.values.count(:optional)
-
-      min_length = count_required + count_vararg
-      max_length = count_required + count_optional
-      max_length = nil if @ends_with_optional_vararg
-      max_length = nil if count_vararg > 0
+      min_length = count_arguments(:required) + count_arguments(:vararg)
+      max_length = count_arguments(:required) + count_arguments(/optional/)
+      max_length = nil if count_arguments(/vararg/) > 0
 
       unless (min_length..max_length) === @remainder.size
 
@@ -209,10 +201,10 @@ class OptionsByExample
         case arity
         when :required
           @argument_values[argument_name] = @remainder.shift
-        when :vararg
+        when :vararg, :optional_vararg
           @argument_values[argument_name] = @remainder.shift(@remainder.length - remaining_arguments)
         when :optional
-          break if @remainder.empty?
+          next if @remainder.empty?
           @argument_values[argument_name] = @remainder.shift
         # :nocov:
         else
@@ -222,13 +214,10 @@ class OptionsByExample
       end
     end
 
-    def special_case_if_ends_with_optional_vararg
-      return unless @ends_with_optional_vararg
-      final_argument_name = @argument_names.keys.last
-      @argument_values[final_argument_name] = [
-        *@argument_values[final_argument_name],
-        *@remainder.shift(@remainder.length),
-      ]
+    private
+
+    def count_arguments(pattern)
+      @argument_names.values.grep(pattern).count
     end
   end
 end
