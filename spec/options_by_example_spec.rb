@@ -69,7 +69,7 @@ describe OptionsByExample do
       Usage: connect [options] host port [mode]
 
       Options:
-        -s, --secure        Establish a secure connection (SSL/TSL)
+        -s, --secure        Establish a secure connection (SSL/TLS)
         -v, --verbose       Enable verbose output for detailed information
         -r, --retries ARG   Number of connection retries (default 3)
         -t, --timeout ARG   Set connection timeout in seconds
@@ -286,7 +286,7 @@ describe OptionsByExample do
       }.to abort_with "Unexpected arguments found before option '-v', please provide all options before arguments"
     end
 
-    it 'raises a helpful error for ambigious missing arguments' do
+    it 'raises a helpful error for ambiguous missing arguments' do
       expect {
         this.parse %w{--timeout example.com 80}
       }.to abort_with "Expected 2-3 arguments, but received only one (considering --timeout takes an argument)"
@@ -361,7 +361,7 @@ describe OptionsByExample do
       }.to output(start_with 'Usage:').to_stdout.and exit_with_status(0)
     end
 
-    it 'prints diagnostics when undocument password is given' do
+    it 'prints diagnostics when undocumented password is given' do
       expect {
         this.parse %w{-h debug!}
       }.to output(start_with '@argument_names =').to_stdout.and exit_with_status(0)
@@ -408,13 +408,13 @@ describe OptionsByExample do
       expect(this.arguments.keys).to match_array [:source, :dest]
     end
 
-    it 'raises an error for emtpy ARGV' do
+    it 'raises an error for empty ARGV' do
       expect {
         this.parse %w{}
       }.to abort_with "Expected 2 arguments, but received none"
     end
 
-    it 'raises an error for missing required argumente' do
+    it 'raises an error for missing required argument' do
       expect {
         this.parse %w{80}
       }.to abort_with "Expected 2 arguments, but received only one"
@@ -600,7 +600,7 @@ describe OptionsByExample do
       }.to abort_with "Expected 2-5 arguments, but received only one"
     end
 
-    it 'chokes when to many arguments are provided' do
+    it 'chokes when too many arguments are provided' do
       expect {
         this.parse %w{the quick fox jumps over the lazy dog}
       }.to abort_with "Expected 2-5 arguments, but received too many"
@@ -618,7 +618,7 @@ describe OptionsByExample do
       expect(this.argument_files).to eq ['foo', 'bar']
     end
 
-    it 'expects at least on repeated value' do
+    it 'expects at least one repeated value' do
       expect {
         this.parse(%w{example.zip})
       }.to abort_with 'Expected 2 or more arguments, but received only one'

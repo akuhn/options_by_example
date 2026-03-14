@@ -21,9 +21,9 @@ describe 'UsageSpecification' do
     }.to raise_error "Found invalid usage token '^^^'"
   end
 
-  it 'chokes on preceeding text' do
+  it 'chokes on preceding text' do
     expect {
-      parse_spec 'preceeding text Usage:'
+      parse_spec 'preceding text Usage:'
     }.to raise_error RuntimeError
   end
 

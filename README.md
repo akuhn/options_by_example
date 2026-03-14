@@ -48,7 +48,7 @@ users to assess network connectivity and diagnose potential problems.
 Usage: connect [options] host port [mode]
 
 Options:
-  -s, --secure        Establish a secure connection (SSL/TSL)
+  -s, --secure        Establish a secure connection (SSL/TLS)
   -v, --verbose       Enable verbose output for detailed information
   -r, --retries NUM   Number of connection retries (default 3)
   -t, --timeout NUM   Set connection timeout in seconds
@@ -58,4 +58,3 @@ Arguments:
   port                The target port to connect to (e.g., 80)
   [mode]              Optional connection mode (active or passive)
 ```
-
