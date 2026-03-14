@@ -48,10 +48,10 @@ describe 'UsageSpecification' do
   it 'chokes when mixing optional and repeated arguments' do
     expect {
       parse_spec 'Usage: command arg files... [mode]'
-    }.to raise_error "Cannot combine dotted and optional arguments"
+    }.to raise_error "Cannot combine vararg and optional arguments"
   end
 
-  it 'parses trailing dotted argument' do
+  it 'parses trailing vararg argument' do
     usage = parse_spec 'Usage: upload file type tags...'
     expect(usage.argument_names).to eq({
       file: :required,
@@ -60,7 +60,7 @@ describe 'UsageSpecification' do
     })
   end
 
-  it 'parses leading dotted argument' do
+  it 'parses leading vararg argument' do
     usage = parse_spec 'Usage: filter logs... from until'
     expect(usage.argument_names).to eq({
       logs: :vararg,
@@ -69,7 +69,7 @@ describe 'UsageSpecification' do
     })
   end
 
-  it 'parses dotted argument in the middle' do
+  it 'parses vararg argument in the middle' do
     usage = parse_spec 'Usage: convert input files... format'
     expect(usage.argument_names).to eq({
       input: :required,
@@ -78,28 +78,28 @@ describe 'UsageSpecification' do
     })
   end
 
-  it 'parses dotted arguments with whitespace' do
+  it 'parses vararg arguments with whitespace' do
     usage = parse_spec 'Usage: copy source ... dest'
     expect(usage.argument_names).to include source: :vararg
   end
 
-  it 'parses multiple dotted arguments and errors' do
+  it 'parses multiple vararg arguments and errors' do
     expect {
       parse_spec 'Usage: merge sources... files...'
-    }.to raise_error "Found more than one dotted arguments"
+    }.to raise_error "Found more than one vararg arguments"
   end
 
-  it 'parses only dotted argument' do
+  it 'parses only vararg argument' do
     usage = parse_spec 'Usage: print items...'
     expect(usage.argument_names).to eq items: :vararg
   end
 
-  it 'parses only optional dotted argument' do
+  it 'parses only optional vararg argument' do
     usage = parse_spec 'Usage: print [items...]'
     expect(usage.argument_names).to eq items: :optional_vararg
   end
 
-  it 'parses optional dotted argument' do
+  it 'parses optional vararg argument' do
     usage = parse_spec 'Usage: connect host port [mode] [files...]'
 
     expect(usage.argument_names).to eq({
@@ -110,15 +110,15 @@ describe 'UsageSpecification' do
     })
   end
 
-  it 'chokes when optional dotted argument is not trailing' do
+  it 'chokes when optional vararg argument is not trailing' do
     expect {
       parse_spec 'Usage: print [items...] [mode]'
     }.to raise_error "Found invalid usage token '[mode]'" # FIXME better message
   end
 
-  it 'chokes when mixing dotted and optional dotted arguments' do
+  it 'chokes when mixing vararg and optional vararg arguments' do
     expect {
       parse_spec 'Usage: print items... [more...]'
-    }.to raise_error "Cannot combine dotted and optional arguments"
+    }.to raise_error "Cannot combine vararg and optional arguments"
   end
 end

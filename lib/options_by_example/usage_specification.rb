@@ -52,11 +52,11 @@ class OptionsByExample
       raise "Found invalid usage token '#{tokens.first}'" unless tokens.empty?
 
       if count_arguments(:vararg) > 0 && count_arguments(/optional/) > 0
-        raise "Cannot combine dotted and optional arguments"
+        raise "Cannot combine vararg and optional arguments"
       end
 
       if count_arguments(/vararg/) > 1
-        raise "Found more than one dotted arguments"
+        raise "Found more than one vararg arguments"
       end
 
       # --- 2) Parse option names ---------------------------------------

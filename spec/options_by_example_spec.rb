@@ -607,7 +607,7 @@ describe OptionsByExample do
     end
   end
 
-  describe 'dot-dot-dot arguments' do
+  describe 'vararg arguments' do
 
     let(:usage_message) { "Usage: zip archive files..." }
 
@@ -642,7 +642,7 @@ describe OptionsByExample do
     end
   end
 
-  describe 'optional dot-dot-dot argument' do
+  describe 'optional vararg argument' do
 
     let(:usage_message) { "Usage: connect host port [mode] [files...]" }
 
@@ -666,7 +666,7 @@ describe OptionsByExample do
       expect(this.argument_files).to eq []
     end
 
-    it 'prefers optional argument before optional dotted argument' do
+    it 'prefers optional argument before optional vararg argument' do
       this.parse %w{example.org 80 alpha beta}
 
       expect(this.argument_mode).to eq 'alpha'
@@ -680,7 +680,7 @@ describe OptionsByExample do
     end
   end
 
-  describe 'optional-only dot-dot-dot argument' do
+  describe 'optional-only vararg argument' do
 
     let(:usage_message) { "Usage: collect [items...]" }
 
