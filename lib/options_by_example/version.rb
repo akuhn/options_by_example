@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '4.0.0'
+  VERSION = '4.1.0-beta'
 end
 
 
@@ -10,6 +10,10 @@ __END__
 # Major version bump when breaking changes or new features
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
+
+4.1.0-beta
+  - Treat everything after double-dash as positional arguments
+  - Improve error message when usage is split across lines
 
 4.0.0
   - Remove support for leading optional arguments (breaking change)

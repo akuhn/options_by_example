@@ -297,6 +297,14 @@ describe OptionsByExample do
         this.parse %w{example.com 80 passive gibberish}
       }.to abort_with "Expected 2-3 arguments, but received too many"
     end
+
+    it 'treats everything after double-dash as positional arguments' do
+      this.parse %w{--secure -- -x 80}
+
+      expect(this.include_secure?).to be true
+      expect(this.argument_host).to eq '-x'
+      expect(this.argument_port).to eq '80'
+    end
   end
 
   describe "parsing options" do

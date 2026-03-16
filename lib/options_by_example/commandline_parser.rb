@@ -94,9 +94,15 @@ class OptionsByExample
     end
 
     def raise_if_unknown_options
-      @slices.each do |option, *args|
-        next unless option.start_with?("-")
-        raise "Found unknown option '#{option}'" unless @option_names.include?(option)
+      @slices.each do |option, _|
+        case option
+        when '--'
+          break
+        when /^-/
+          unless @option_names.include?(option)
+            raise "Found unknown option '#{option}'"
+          end
+        end
       end
     end
 
@@ -105,6 +111,9 @@ class OptionsByExample
 
       until pending.empty?
         current = pending.first
+
+        # Treat everything after double-dash as a positional
+        return pending.flatten.drop(1) if current.first == '--'
 
         unless current.first =~ /^-/
           return current if pending.length == 1
