@@ -22,24 +22,15 @@ class OptionsByExample
       @option_values = {}
     end
 
-    def parse(array)
-
-      # Separate command-line options and their respective arguments into
-      # chunks, plus tracking leading excess arguments. This organization
-      # facilitates further processing and validation of the input.
-
-      @slices = []
-      @remainder = current = []
-      array.each do |each|
-        @slices << current = [] if each.start_with?(?-)
-        current << each
-      end
+    def parse(argv)
+      @slices = argv.slice_before(/^-/).entries
 
       exit_if_help_option
       unpack_combined_shorthand_options
       expand_dash_number_to_dash_n_option
       raise_if_unknown_options
-      parse_options
+
+      @remainder = parse_options_and_return_remainder
       coerce_num_date_time_etc
 
       validate_number_of_arguments
@@ -104,29 +95,38 @@ class OptionsByExample
 
     def raise_if_unknown_options
       @slices.each do |option, *args|
+        next unless option.start_with?("-")
         raise "Found unknown option '#{option}'" unless @option_names.include?(option)
       end
     end
 
-    def parse_options
-      @slices.each do |option, *args|
-        if @remainder.any?
-          raise "Unexpected arguments found before option '#{option}', please provide all options before arguments"
+    def parse_options_and_return_remainder
+      pending = @slices.dup
+
+      until pending.empty?
+        current = pending.first
+
+        unless current.first =~ /^-/
+          return current if pending.length == 1
+          raise "Unexpected arguments found before option '#{pending[1].first}', please provide all options before arguments"
         end
 
-        option_name, has_argument, ___ = @option_names[option]
+        option = current.shift # consume the option/flag
+        option_name, has_argument, _ = @option_names[option]
         @option_values[option_name] = true
 
         if has_argument
-          raise "Expected argument for option '#{option}', got none" if args.empty?
-          @argument_values[option_name] = args.shift
+          raise "Expected argument for option '#{option}', got none" unless current.first
+          @argument_values[option_name] = current.shift # consume the argument
           @option_took_argument = option
         else
           @option_took_argument = nil
         end
 
-        @remainder = args
+        pending.shift if current.empty?
       end
+
+      return []
     end
 
     def coerce_num_date_time_etc
