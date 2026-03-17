@@ -1,6 +1,7 @@
 # Options by Example
 
-No-code options parser that automatically detects command-line options from the usage text of your application.
+No-code options parser that automatically detects command-line options from the usage text.
+
 Features
 
 - Automatically infers options and argument names from usage text
@@ -14,8 +15,8 @@ require %(options_by_example)
 
 flags = OptionsByExample.read(DATA).parse(ARGV)
 
-puts "Feeling verbose today" if flags.include?(:verbose)
-puts flags.get(:words).sample(flags.fetch(:num) { 1 })
+puts 'Feeling verbose today' if flags.include?(:verbose)
+puts flags.get(:words).sample(flags.get(:num))
 
 __END__
 Choose at random from a list of provided words.
@@ -24,7 +25,7 @@ Usage: random.rb [options] words ...
 
 Options:
   -n, --num NUM     Number of choices (default 1)
-  -v, --verbose     Enable verbose mode
+  --verbose         Enable verbose mode
 ```
 
 And then call the program with eg
