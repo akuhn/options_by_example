@@ -305,6 +305,43 @@ describe OptionsByExample do
       expect(this.argument_host).to eq '-x'
       expect(this.argument_port).to eq '80'
     end
+
+    it 'keeps dash-number literal after double-dash when one argument is expected' do
+      parser = OptionsByExample.new('Usage: command value')
+      parser.parse %w{-- -15}
+
+      expect(parser.argument_value).to eq '-15'
+    end
+
+    it 'does not let dash-number after double-dash hide missing required arguments' do
+      parser = OptionsByExample.new('Usage: command left right')
+
+      expect {
+        parser.parse %w{-- -15}
+      }.to abort_with "Expected 2 arguments, but received only one"
+    end
+
+    it 'keeps unknown stacked shorthand literal after double-dash' do
+      parser = OptionsByExample.new('Usage: command value')
+      parser.parse %w{-- -sv}
+
+      expect(parser.argument_value).to eq '-sv'
+    end
+
+    it 'keeps known stacked shorthand literal after double-dash when one argument is expected' do
+      parser = OptionsByExample.new('Usage: command [-s] [-v] value')
+      parser.parse %w{-- -sv}
+
+      expect(parser.argument_value).to eq '-sv'
+    end
+
+    it 'does not let stacked shorthand after double-dash hide missing required arguments' do
+      parser = OptionsByExample.new('Usage: command [-s] [-v] left right')
+
+      expect {
+        parser.parse %w{-- -sv}
+      }.to abort_with "Expected 2 arguments, but received only one"
+    end
   end
 
   describe "parsing options" do

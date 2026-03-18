@@ -24,6 +24,7 @@ class OptionsByExample
 
     def parse(argv)
       @slices = argv.slice_before(/^-/).entries
+      treat_everything_after_double_dash_as_positionals
 
       exit_if_help_option
       unpack_combined_shorthand_options
@@ -42,6 +43,11 @@ class OptionsByExample
     end
 
     private
+
+    def treat_everything_after_double_dash_as_positionals
+      index = @slices.index { |head,| head == '--' }
+      @slices[index..] = [@slices.drop(index).flatten] if index
+    end
 
     def exit_if_help_option
       @slices.each do |option, *args|
@@ -96,9 +102,7 @@ class OptionsByExample
     def raise_if_unknown_options
       @slices.each do |option, _|
         case option
-        when '--'
-          break
-        when /^-/
+        when /^--?\w/
           unless @option_names.include?(option)
             raise "Found unknown option '#{option}'"
           end
@@ -112,10 +116,8 @@ class OptionsByExample
       until pending.empty?
         current = pending.first
 
-        # Treat everything after double-dash as a positional
-        return pending.flatten.drop(1) if current.first == '--'
-
-        unless current.first =~ /^-/
+        unless current.first =~ /^--?\w/
+          current.shift if current.first == '--' # consume double-dash
           return current if pending.length == 1
           raise "Unexpected arguments found before option '#{pending[1].first}', please provide all options before arguments"
         end
