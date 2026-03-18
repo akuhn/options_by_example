@@ -100,12 +100,9 @@ class OptionsByExample
     end
 
     def raise_if_unknown_options
-      @slices.each do |option, _|
-        case option
-        when /^--?\w/
-          unless @option_names.include?(option)
-            raise "Found unknown option '#{option}'"
-          end
+      @slices.each do |option,|
+        if option =~ /^--?\w/ and not @option_names.include?(option)
+          raise "Found unknown option '#{option}'"
         end
       end
     end
