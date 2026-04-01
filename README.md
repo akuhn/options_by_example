@@ -7,6 +7,7 @@ Features
 - Automatically infers options and argument names from usage text
 - Parses those arguments and options from the command line (ARGV)
 - Raises errors for unknown options or missing required arguments
+- Supports typed arguments, eg `--lines NUM` or `--since DATE`
 
 Example
 
@@ -45,4 +46,3 @@ Alternatively, add this line to your Gemfile and run bundle install:
 ```
 gem 'options_by_example'
 ```
-

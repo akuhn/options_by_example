@@ -147,6 +147,9 @@ class OptionsByExample
           when 'NUM'
             expected_type = 'an integer value'
             value = Integer value
+          when 'FLOAT'
+            expected_type = 'a floating-point value'
+            value = Float value
           when 'DATE'
             expected_type = 'a date (e.g. YYYY-MM-DD)'
             value = Date.parse value

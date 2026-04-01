@@ -561,7 +561,7 @@ describe OptionsByExample do
   describe 'argument coercion' do
 
     let(:this) {
-      OptionsByExample.new(%{Usage: $0 [--num NUM] [--date DATE] [--time TIME]})
+      OptionsByExample.new(%{Usage: $0 [--num NUM] [--ratio FLOAT] [--date DATE] [--time TIME]})
     }
 
     it 'parses integer values' do
@@ -578,6 +578,22 @@ describe OptionsByExample do
       expect(this.argument_date).to be_a Date
     end
 
+    it 'parses floating-point values' do
+      this.parse %w{--ratio 1.25}
+
+      expect(this.include_ratio?).to be true
+      expect(this.argument_ratio).to eq 1.25
+      expect(this.argument_ratio).to be_a Float
+    end
+
+    it 'parses integer-like floating-point values' do
+      this.parse %w{--ratio 2}
+
+      expect(this.include_ratio?).to be true
+      expect(this.argument_ratio).to eq 2.0
+      expect(this.argument_ratio).to be_a Float
+    end
+
     it 'parses timestamps' do
       this.parse %w{--time 14:41}
 
@@ -589,6 +605,21 @@ describe OptionsByExample do
       expect {
         this.parse %w{--num foo}
       }.to abort_with "Invalid argument \"foo\" for option '--num', please provide an integer value"
+    end
+
+    it 'raises a helpful error for invalid float arguments' do
+      expect {
+        this.parse %w{--ratio abc}
+      }.to abort_with "Invalid argument \"abc\" for option '--ratio', please provide a floating-point value"
+    end
+
+    it 'coerces default float values' do
+      this = OptionsByExample.new(%{Usage: $0 [--ratio FLOAT (default 0.5)]})
+      this.parse []
+
+      expect(this.include_ratio?).to be false
+      expect(this.argument_ratio).to eq 0.5
+      expect(this.argument_ratio).to be_a Float
     end
   end
 

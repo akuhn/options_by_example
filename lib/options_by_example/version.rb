@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '4.1.0-beta'
+  VERSION = '4.1.0'
 end
 
 
@@ -11,9 +11,10 @@ __END__
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
 
-4.1.0-beta
+4.1.0
   - Treat everything after double-dash as positional arguments
   - Improve error message when usage is split across lines
+  - Add support for FLOAT arguments, eg `--ratio FLOAT`
 
 4.0.0
   - Remove support for leading optional arguments (breaking change)
