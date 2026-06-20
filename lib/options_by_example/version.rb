@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OptionsByExample
-  VERSION = '4.1.0'
+  VERSION = '4.2.0'
 end
 
 
@@ -10,6 +10,10 @@ __END__
 # Major version bump when breaking changes or new features
 # Minor version bump when backward-compatible changes or enhancements
 # Patch version bump when backward-compatible bug fixes, security updates etc
+
+4.2.0
+  - Generate #get_NAME methods for arguments
+  - Keep #argument_NAME as backwards-compatible aliases
 
 4.1.0
   - Treat everything after double-dash as positional arguments

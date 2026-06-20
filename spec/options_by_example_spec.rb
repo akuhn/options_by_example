@@ -105,6 +105,9 @@ describe OptionsByExample do
   describe 'custom accessor methods' do
 
     it 'responds to positional arguments' do
+      expect(this).to respond_to :get_mode
+      expect(this).to respond_to :get_port
+      expect(this).to respond_to :get_host
       expect(this).to respond_to :argument_mode
       expect(this).to respond_to :argument_port
       expect(this).to respond_to :argument_host
@@ -118,12 +121,15 @@ describe OptionsByExample do
     it 'responds to options with arguments' do
       expect(this).to respond_to :include_retries?
       expect(this).to respond_to :include_timeout?
+      expect(this).to respond_to :get_retries
+      expect(this).to respond_to :get_timeout
       expect(this).to respond_to :argument_retries
       expect(this).to respond_to :argument_timeout
     end
 
     it 'does not respond to options without argument' do
       expect(this).to respond_to :include_secure?
+      expect(this).to_not respond_to :get_secure
       expect(this).to_not respond_to :argument_secure
     end
 
@@ -133,6 +139,7 @@ describe OptionsByExample do
 
       expect(this).to respond_to :include_find_matches?
       expect(this).to respond_to :include_enable_feature?
+      expect(this).to respond_to :get_enable_feature
       expect(this).to respond_to :argument_enable_feature
     end
 
@@ -140,6 +147,7 @@ describe OptionsByExample do
       usage = 'Usage: $0 [options] BLOCK_NUMBER'
       this = OptionsByExample.new(usage)
 
+      expect(this).to respond_to :get_block_number
       expect(this).to respond_to :argument_block_number
     end
   end
@@ -156,28 +164,38 @@ describe OptionsByExample do
     end
   end
 
-  describe "#argument_NAME" do
+  describe "#get_NAME" do
 
     it 'returns positional argument values' do
       this.parse %w{-v --retries 5 example.com 80}
 
-      expect(this.argument_mode).to be_nil
-      expect(this.argument_host).to eq "example.com"
-      expect(this.argument_port).to eq "80"
+      expect(this.get_mode).to be_nil
+      expect(this.get_host).to eq "example.com"
+      expect(this.get_port).to eq "80"
     end
 
     it 'returns optional argument values' do
       this.parse %w{-v --retries 5 example.com 80}
 
-      expect(this.argument_retries).to eq "5"
-      expect(this.argument_timeout).to be_nil
+      expect(this.get_retries).to eq "5"
+      expect(this.get_timeout).to be_nil
     end
 
     it 'passes arguments through block' do
       this.parse %w{-v --retries 5 example.com 80}
 
-      expect(this.argument_retries { |val| val * 3 }).to eq "555"
-      expect(this.argument_timeout { |val| val * 3 }).to be_nil
+      expect(this.get_retries { |val| val * 3 }).to eq "555"
+      expect(this.get_timeout { |val| val * 3 }).to be_nil
+    end
+  end
+
+  describe 'deprecated features to be removed in 5.0.0' do
+
+    it 'aliases argument_NAME to get_NAME for backwards compatibility' do
+      this.parse %w{-v --retries 5 example.com 80}
+
+      expect(this.argument_host).to eq this.get_host
+      expect(this.argument_retries { |val| val * 3 }).to eq this.get_retries { |val| val * 3 }
     end
   end
 

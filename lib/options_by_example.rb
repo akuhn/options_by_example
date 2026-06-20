@@ -81,10 +81,12 @@ class OptionsByExample
         .compact,
     ].each do |argument_name|
       instance_eval %{
-        def argument_#{argument_name}
+        def get_#{argument_name}
           val = @arguments[:#{argument_name}]
           val && block_given? ? (yield val) : val
         end
+
+        alias argument_#{argument_name} get_#{argument_name}
       }
     end
   end
@@ -99,4 +101,3 @@ class OptionsByExample
     end
   end
 end
-
