@@ -120,12 +120,23 @@ class OptionsByExample
         end
 
         option = current.shift # consume the option/flag
-        option_name, has_argument, _ = @option_names[option]
+        option_name, _, argument_arity, _ = @option_names[option]
         @option_values[option_name] = true
 
-        if has_argument
+        if argument_arity == :required
           raise "Expected argument for option '#{option}', got none" unless current.first
-          @argument_values[option_name] = current.shift # consume the argument
+
+          @argument_values[option_name] = current.shift
+          @option_took_argument = option
+        elsif argument_arity == :optional && current.first
+          if pending.length == 1
+            required_count = count_arguments(:required)
+            if current.length <= required_count or @argument_names.length != required_count
+              raise "Ambiguous argument for option '#{option}', please use -- before positional arguments"
+            end
+          end
+
+          @argument_values[option_name] = current.shift
           @option_took_argument = option
         else
           @option_took_argument = nil
@@ -138,7 +149,7 @@ class OptionsByExample
     end
 
     def coerce_num_date_time_etc
-      @option_names.each do |option, (each, argument_name, default_value)|
+      @option_names.each do |option, (each, argument_name, argument_arity, default_value)|
         value = @argument_values.fetch(each, default_value)
         next unless value
 

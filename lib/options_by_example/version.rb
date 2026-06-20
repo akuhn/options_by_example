@@ -17,6 +17,7 @@ __END__
   - New method #get_at_most_one returns the provided option or nil
   - New method #get_mutually_exclusive aliases #get_at_most_one
   - Deprecate #expect_at_most_one_of in favor of #expect_at_most_one
+  - Support optional option arguments, eg '--compress [NUM]'
 
 4.1.0
   - Treat everything after double-dash as positional arguments

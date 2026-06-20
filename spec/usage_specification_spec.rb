@@ -99,6 +99,35 @@ describe 'UsageSpecification' do
     expect(usage.argument_names).to eq items: :optional_vararg
   end
 
+  it 'parses option with optional argument' do
+    usage = parse_spec %{
+      Usage: backup [options] source
+
+      Options:
+        --quiet
+        --compress [level]
+    }
+
+    expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
+    expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
+  end
+
+  it 'parses inline option with optional argument' do
+    usage = parse_spec 'Usage: backup [--quiet] [--compress [level]] source'
+
+    expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
+    expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
+    expect(usage.argument_names).to eq source: :required
+  end
+
+  it 'parses tab separated option descriptions' do
+    usage = parse_spec "Usage: backup [options] source\n\nOptions:\n  --quiet\tSuppress output\n  --compress [level]\tCompress backup\n  --retries NUM\tRetry count\n"
+
+    expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
+    expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
+    expect(usage.option_names['--retries']).to eq [:retries, 'NUM', :required, nil]
+  end
+
   it 'parses optional vararg argument' do
     usage = parse_spec 'Usage: connect host port [mode] [files...]'
 
