@@ -197,6 +197,13 @@ describe OptionsByExample do
       expect(this.argument_host).to eq this.get_host
       expect(this.argument_retries { |val| val * 3 }).to eq this.get_retries { |val| val * 3 }
     end
+
+    it 'aliases expect_at_most_one_of to expect_at_most_one for backwards compatibility' do
+      this = OptionsByExample.new "Usage: command [-a] [-b] [-c] [-v] [-x]"
+      this.parse %w{-a -v -x}
+
+      this.expect_at_most_one_of :a, :b, :c
+    end
   end
 
   describe "#fetch" do
@@ -652,7 +659,25 @@ describe OptionsByExample do
 
     it 'can be given as an inclusive constraint' do
       this.parse %w{-a -v -x}
-      this.expect_at_most_one_of :a, :b, :c
+      this.expect_at_most_one :a, :b, :c
+    end
+
+    it 'returns the provided option' do
+      this.parse %w{-a -v -x}
+
+      expect(this.get_at_most_one(:a, :b, :c)).to eq :a
+    end
+
+    it 'returns nil when none are provided' do
+      this.parse %w{-v -x}
+
+      expect(this.get_at_most_one(:a, :b, :c)).to be nil
+    end
+
+    it 'returns the provided mutually-exclusive option' do
+      this.parse %w{-a -v -x}
+
+      expect(this.get_mutually_exclusive(:a, :b, :c)).to eq :a
     end
 
     it 'aborts when more than one is found' do

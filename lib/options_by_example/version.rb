@@ -14,6 +14,9 @@ __END__
 4.2.0
   - Generate #get_NAME methods for arguments
   - Keep #argument_NAME as backwards-compatible aliases
+  - New method #get_at_most_one returns the provided option or nil
+  - New method #get_mutually_exclusive aliases #get_at_most_one
+  - Deprecate #expect_at_most_one_of in favor of #expect_at_most_one
 
 4.1.0
   - Treat everything after double-dash as positional arguments
