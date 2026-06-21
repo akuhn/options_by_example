@@ -46,7 +46,7 @@ class OptionsByExample
 
     def treat_everything_after_double_dash_as_positionals
       index = @slices.index { |head,| head == '--' }
-      @slices[index..] = [@slices.drop(index).flatten] if index
+      @slices[index..-1] = [@slices.drop(index).flatten] if index
     end
 
     def exit_if_help_option
