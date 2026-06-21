@@ -16,8 +16,8 @@ require %(options_by_example)
 
 flags = OptionsByExample.read(DATA).parse(ARGV)
 
-puts 'Feeling verbose today' if flags.include?(:verbose)
-puts flags.get(:words).sample(flags.get(:num))
+puts 'Feeling verbose today' if flags.include_verbose?
+puts flags.get_words.sample(flags.get_num)
 
 __END__
 Choose at random from a list of provided words.
