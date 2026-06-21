@@ -23,7 +23,7 @@ class OptionsByExample
 
       usage_line = text.lines.grep(/Usage:/).first
       raise "Expected usage string, got none" unless usage_line
-      tokens = usage_line.scan(/\[.*?\]?\]|\w+ \.\.\.|\S+/)
+      tokens = usage_line.split(/(\[.*?\]?\]|\w+ \.\.\.)|\s+/).reject(&:empty?)
       raise "Expected usage line to start with 'Usage:'" unless tokens.shift == 'Usage:'
       raise "Expected command name on same line as 'Usage:'" unless tokens.shift
       tokens.shift if tokens.first == '[options]'
@@ -79,8 +79,8 @@ class OptionsByExample
         short_form = nil
         long_form = nil
         option_name = nil
-        argument_name = nil
         argument_arity = nil
+        argument_type = nil
         default_value = nil
 
         if /^-(\w)$/ === tokens.first
@@ -95,12 +95,12 @@ class OptionsByExample
         end
 
         if tokens.shift == ' '
-          if /^\[(\w+)\]$/ === tokens.first
-            argument_name = $1
+          if /^(\[(.+)\]|(.+)\?)$/ === tokens.first
+            argument_type = $2 || $3
             argument_arity = :optional
             tokens.shift
-          elsif tokens.first
-            argument_name = tokens.shift
+          else
+            argument_type = tokens.shift
             argument_arity = :required
           end
         end
@@ -109,7 +109,7 @@ class OptionsByExample
           default_value = $1
         end
 
-        ary = [option_name, argument_name, argument_arity, default_value]
+        ary = [option_name, argument_arity, argument_type, default_value]
         [short_form, long_form].each do |each|
           @option_names[each] = ary if each
         end

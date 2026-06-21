@@ -99,9 +99,7 @@ describe OptionsByExample do
     end
 
     it 'uses default when optional option argument is omitted' do
-      pending 'inline defaults for optional option arguments are not parsed yet'
-
-      usage = 'Usage: backup [--compress [NUM] (default 7)] source'
+      usage = 'Usage: backup [--compress NUM? (default 7)] source'
       with_argument = OptionsByExample.new(usage).parse(%w{--compress 9 photos})
       with_default = OptionsByExample.new(usage).parse(%w{--compress -- photos})
       without_option = OptionsByExample.new(usage).parse(%w{photos})
@@ -158,7 +156,7 @@ describe OptionsByExample do
       option_names = this.usage_spec.option_names
       expect(option_names['-v']).to eq [:verbose, nil, nil, nil]
       expect(option_names['--verbose']).to eq [:verbose, nil, nil, nil]
-      expect(option_names['--retries']).to eq [:retries, "ARG", :required, "3"]
+      expect(option_names['--retries']).to eq [:retries, :required, "ARG", "3"]
       expect(option_names.size).to be 8
     end
   end

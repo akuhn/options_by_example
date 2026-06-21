@@ -120,7 +120,7 @@ class OptionsByExample
         end
 
         option = current.shift # consume the option/flag
-        option_name, _, argument_arity, _ = @option_names[option]
+        option_name, argument_arity, _, _ = @option_names[option]
         @option_values[option_name] = true
 
         if argument_arity == :required
@@ -149,12 +149,12 @@ class OptionsByExample
     end
 
     def coerce_num_date_time_etc
-      @option_names.each do |option, (each, argument_name, argument_arity, default_value)|
+      @option_names.each do |option, (each, _, argument_type, default_value)|
         value = @argument_values.fetch(each, default_value)
         next unless value
 
         begin
-          case argument_name
+          case argument_type
           when 'NUM'
             expected_type = 'an integer value'
             value = Integer value

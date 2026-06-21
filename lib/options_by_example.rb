@@ -85,7 +85,7 @@ class OptionsByExample
     [
       *@usage_spec.argument_names.keys,
       *@usage_spec.option_names.values
-        .map { |option_name, has_argument| option_name if has_argument }
+        .map { |option_name, argument_arity| option_name if argument_arity }
         .compact,
     ].each do |argument_name|
       instance_eval %{

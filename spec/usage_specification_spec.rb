@@ -103,36 +103,34 @@ describe 'UsageSpecification' do
     usage = parse_spec 'Usage: backup [--quiet] [--compress [level]] source'
 
     expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
-    expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
+    expect(usage.option_names['--compress']).to eq [:compress, :optional, 'level', nil]
     expect(usage.argument_names).to eq source: :required
   end
 
   it 'parses shorthand-only option with optional argument' do
     usage = parse_spec 'Usage: backup [-c [level]] src'
 
-    expect(usage.option_names['-c']).to eq [:c, 'level', :optional, nil]
+    expect(usage.option_names['-c']).to eq [:c, :optional, 'level', nil]
     expect(usage.argument_names).to eq src: :required
   end
 
   it 'parses shorthand and longhand option with optional argument' do
     usage = parse_spec 'Usage: backup [-c, --compress [level]] src'
 
-    expect(usage.option_names['-c']).to eq [:compress, 'level', :optional, nil]
-    expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
+    expect(usage.option_names['-c']).to eq [:compress, :optional, 'level', nil]
+    expect(usage.option_names['--compress']).to eq [:compress, :optional, 'level', nil]
   end
 
   it 'parses inline defaults for optional option arguments' do
-    pending 'inline defaults for optional option arguments are not parsed yet'
+    usage = parse_spec 'Usage: backup [--compress NUM? (default 7)] source'
 
-    usage = parse_spec 'Usage: backup [--compress [NUM] (default 7)] source'
-
-    expect(usage.option_names['--compress']).to eq [:compress, 'NUM', :optional, '7']
+    expect(usage.option_names['--compress']).to eq [:compress, :optional, 'NUM', '7']
   end
 
   it 'treats text after one space as option argument' do
     usage = parse_spec 'Usage: command [--option foo]'
 
-    expect(usage.option_names['--option']).to eq [:option, 'foo', :required, nil]
+    expect(usage.option_names['--option']).to eq [:option, :required, 'foo', nil]
   end
 
   it 'treats text after tab as description' do
