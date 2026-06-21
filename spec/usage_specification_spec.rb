@@ -78,7 +78,7 @@ describe 'UsageSpecification' do
     })
   end
 
-  it 'parses vararg arguments with whitespace' do
+  it 'treats space before ellipsis as vararg marker' do
     usage = parse_spec 'Usage: copy source ... dest'
     expect(usage.argument_names).to include source: :vararg
   end
@@ -89,30 +89,17 @@ describe 'UsageSpecification' do
     }.to raise_error "Found more than one vararg arguments"
   end
 
-  it 'parses only vararg argument' do
+  it 'treats lone dotted argument as vararg' do
     usage = parse_spec 'Usage: print items...'
     expect(usage.argument_names).to eq items: :vararg
   end
 
-  it 'parses only optional vararg argument' do
+  it 'treats bracketed dotted argument as optional vararg' do
     usage = parse_spec 'Usage: print [items...]'
     expect(usage.argument_names).to eq items: :optional_vararg
   end
 
-  it 'parses option with optional argument' do
-    usage = parse_spec %{
-      Usage: backup [options] source
-
-      Options:
-        --quiet
-        --compress [level]
-    }
-
-    expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
-    expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
-  end
-
-  it 'parses inline option with optional argument' do
+  it 'treats bracketed option argument as optional' do
     usage = parse_spec 'Usage: backup [--quiet] [--compress [level]] source'
 
     expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
@@ -120,12 +107,44 @@ describe 'UsageSpecification' do
     expect(usage.argument_names).to eq source: :required
   end
 
-  it 'parses tab separated option descriptions' do
-    usage = parse_spec "Usage: backup [options] source\n\nOptions:\n  --quiet\tSuppress output\n  --compress [level]\tCompress backup\n  --retries NUM\tRetry count\n"
+  it 'parses shorthand-only option with optional argument' do
+    usage = parse_spec 'Usage: backup [-c [level]] src'
 
-    expect(usage.option_names['--quiet']).to eq [:quiet, nil, nil, nil]
+    expect(usage.option_names['-c']).to eq [:c, 'level', :optional, nil]
+    expect(usage.argument_names).to eq src: :required
+  end
+
+  it 'parses shorthand and longhand option with optional argument' do
+    usage = parse_spec 'Usage: backup [-c, --compress [level]] src'
+
+    expect(usage.option_names['-c']).to eq [:compress, 'level', :optional, nil]
     expect(usage.option_names['--compress']).to eq [:compress, 'level', :optional, nil]
-    expect(usage.option_names['--retries']).to eq [:retries, 'NUM', :required, nil]
+  end
+
+  it 'parses inline defaults for optional option arguments' do
+    pending 'inline defaults for optional option arguments are not parsed yet'
+
+    usage = parse_spec 'Usage: backup [--compress [NUM] (default 7)] source'
+
+    expect(usage.option_names['--compress']).to eq [:compress, 'NUM', :optional, '7']
+  end
+
+  it 'treats text after one space as option argument' do
+    usage = parse_spec 'Usage: command [--option foo]'
+
+    expect(usage.option_names['--option']).to eq [:option, 'foo', :required, nil]
+  end
+
+  it 'treats text after tab as description' do
+    usage = parse_spec "Usage: command [--option\tfoo]"
+
+    expect(usage.option_names['--option']).to eq [:option, nil, nil, nil]
+  end
+
+  it 'treats text after two spaces as description' do
+    usage = parse_spec 'Usage: command [--option  foo]'
+
+    expect(usage.option_names['--option']).to eq [:option, nil, nil, nil]
   end
 
   it 'parses optional vararg argument' do

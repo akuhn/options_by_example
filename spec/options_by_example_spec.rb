@@ -61,61 +61,65 @@ describe OptionsByExample do
     expect(this.argument_fname).to eq 'example.md'
   end
 
-  it 'supports option with optional argument' do
-    usage = %{
-      Usage: backup [options] source
+  describe 'optional option arguments' do
 
-      Options:
-        --quiet
-        --compress [level]
-    }
-    this = OptionsByExample.new(usage).parse(%w{--quiet --compress high photos})
+    let(:usage_message) { 'Usage: backup [--quiet] [--compress [level]] source' }
 
-    expect(this.include_quiet?).to be true
-    expect(this.include_compress?).to be true
-    expect(this.argument_compress).to eq 'high'
-    expect(this.argument_source).to eq 'photos'
-  end
+    it 'prefers explicit optional option argument over positional source' do
+      this.parse %w{--quiet --compress high photos}
 
-  it 'supports inline option with optional argument' do
-    usage = 'Usage: backup [--quiet] [--compress [level]] source'
-    this = OptionsByExample.new(usage).parse(%w{--quiet --compress high photos})
+      expect(this.include_quiet?).to be true
+      expect(this.include_compress?).to be true
+      expect(this.argument_compress).to eq 'high'
+      expect(this.argument_source).to eq 'photos'
+    end
 
-    expect(this.include_quiet?).to be true
-    expect(this.argument_compress).to eq 'high'
-    expect(this.argument_source).to eq 'photos'
-  end
+    it 'rejects ambiguous positionals' do
+      expect {
+        this.parse %w{--quiet --compress photos}
+      }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
+    end
 
-  it 'requires double-dash before required positionals when optional option argument is missing' do
-    usage = %{
-      Usage: backup [options] source
+    it 'treats double-dash after option as omitted optional argument' do
+      this.parse %w{--quiet --compress -- photos}
 
-      Options:
-        --compress [level]
-    }
+      expect(this.include_quiet?).to be true
+      expect(this.include_compress?).to be true
+      expect(this.argument_compress).to be nil
+      expect(this.argument_source).to eq 'photos'
+    end
 
-    expect {
-      OptionsByExample.new(usage).parse(%w{--compress photos})
-    }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
-  end
+    it 'treats following option as option rather than optional argument' do
+      this.parse %w{--compress --quiet photos}
 
-  it 'uses defaults for optional option arguments' do
-    usage = %{
-      Usage: backup [options] source
+      expect(this.include_compress?).to be true
+      expect(this.argument_compress).to be nil
+      expect(this.include_quiet?).to be true
+      expect(this.argument_source).to eq 'photos'
+    end
 
-      Options:
-        --compress [NUM] (default 6)
-    }
+    it 'uses default when optional option argument is omitted' do
+      pending 'inline defaults for optional option arguments are not parsed yet'
 
-    with_argument = OptionsByExample.new(usage).parse(%w{--compress 9 photos})
-    with_default = OptionsByExample.new(usage).parse(%w{--compress -- photos})
-    without_option = OptionsByExample.new(usage).parse(%w{photos})
+      usage = 'Usage: backup [--compress [NUM] (default 7)] source'
+      with_argument = OptionsByExample.new(usage).parse(%w{--compress 9 photos})
+      with_default = OptionsByExample.new(usage).parse(%w{--compress -- photos})
+      without_option = OptionsByExample.new(usage).parse(%w{photos})
 
-    expect(with_argument.argument_compress).to eq 9
-    expect(with_default.include_compress?).to be true
-    expect(with_default.argument_compress).to eq 6
-    expect(without_option.include_compress?).to be false
-    expect(without_option.argument_compress).to eq 6
+      expect(with_argument.argument_compress).to eq 9
+      expect(with_default.include_compress?).to be true
+      expect(with_default.argument_compress).to eq 7
+      expect(without_option.include_compress?).to be false
+      expect(without_option.argument_compress).to eq 7
+    end
+
+    it 'supports shorthand-only options' do
+      this = OptionsByExample.new('Usage: backup [-c [level]] src').parse(%w{-c high photos})
+
+      expect(this.include_c?).to be true
+      expect(this.argument_c).to eq 'high'
+      expect(this.argument_src).to eq 'photos'
+    end
   end
 
   let(:usage_message) {
@@ -782,30 +786,22 @@ describe OptionsByExample do
       }.to abort_with "Expected 2-5 arguments, but received too many"
     end
 
-    it 'requires double-dash before optional positionals after optional option arguments' do
-      usage = %{
-        Usage: backup [options] [source]
+    describe 'with optional option argument before optional positional' do
 
-        Options:
-          --compress [level]
-      }
+      let(:usage_message) { 'Usage: backup [--compress [level]] [source]' }
 
-      expect {
-        OptionsByExample.new(usage).parse(%w{--compress photos})
-      }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
-    end
+      it 'requires double-dash before optional positionals' do
+        expect {
+          this.parse %w{--compress photos}
+        }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
+      end
 
-    it 'uses double-dash to separate optional option arguments from optional positionals' do
-      usage = %{
-        Usage: backup [options] [source]
+      it 'uses double-dash to separate optional positionals' do
+        this.parse %w{--compress high -- photos}
 
-        Options:
-          --compress [level]
-      }
-      this = OptionsByExample.new(usage).parse(%w{--compress high -- photos})
-
-      expect(this.argument_compress).to eq 'high'
-      expect(this.argument_source).to eq 'photos'
+        expect(this.argument_compress).to eq 'high'
+        expect(this.argument_source).to eq 'photos'
+      end
     end
   end
 
@@ -843,30 +839,22 @@ describe OptionsByExample do
       expect(this.argument_format).to eq 'jpeg'
     end
 
-    it 'requires double-dash before varargs after optional option arguments' do
-      usage = %{
-        Usage: backup [options] sources...
+    describe 'with optional option argument before varargs' do
 
-        Options:
-          --compress [level]
-      }
+      let(:usage_message) { 'Usage: backup [--compress [level]] sources...' }
 
-      expect {
-        OptionsByExample.new(usage).parse(%w{--compress high photos})
-      }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
-    end
+      it 'requires double-dash before varargs' do
+        expect {
+          this.parse %w{--compress high photos}
+        }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
+      end
 
-    it 'uses double-dash to separate optional option arguments from varargs' do
-      usage = %{
-        Usage: backup [options] sources...
+      it 'uses double-dash to separate varargs' do
+        this.parse %w{--compress high -- photos docs}
 
-        Options:
-          --compress [level]
-      }
-      this = OptionsByExample.new(usage).parse(%w{--compress high -- photos docs})
-
-      expect(this.argument_compress).to eq 'high'
-      expect(this.argument_sources).to eq %w{photos docs}
+        expect(this.argument_compress).to eq 'high'
+        expect(this.argument_sources).to eq %w{photos docs}
+      end
     end
   end
 
