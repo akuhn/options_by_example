@@ -373,7 +373,7 @@ describe OptionsByExample do
     it 'raises a helpful error for ambiguous missing arguments' do
       expect {
         this.parse %w{--timeout example.com 80}
-      }.to abort_with "Expected 2-3 arguments, but received only one (considering --timeout takes an argument)"
+      }.to abort_with "Ambiguous argument for option '--timeout', not enough remaining positional arguments"
     end
 
     it 'raises an error for too many arguments' do
@@ -633,6 +633,27 @@ describe OptionsByExample do
 
       expect(this.include_lines?).to be true
       expect(this.argument_lines).to eq 5
+    end
+
+    it 'does not consume required vararg as option argument' do
+      expect {
+        this.parse %w{--lines example}
+      }.to abort_with "Ambiguous argument for option '--lines', not enough remaining positional arguments"
+    end
+
+    it 'does not consume required positional and vararg as option argument' do
+      this = OptionsByExample.new('Usage: copy [--mode MODE] source files...')
+
+      expect {
+        this.parse %w{--mode src file}
+      }.to abort_with "Ambiguous argument for option '--mode', not enough remaining positional arguments"
+    end
+
+    it 'do not raise ambiguous argument warning for this specific case' do
+      this = OptionsByExample.new('Usage: backup [--tag TAG] [source]').parse(%w{--tag photos})
+
+      expect(this.argument_tag).to eq 'photos'
+      expect(this.argument_source).to be nil
     end
 
     it 'raises an error for missing argument' do

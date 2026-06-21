@@ -126,20 +126,23 @@ class OptionsByExample
         if argument_arity == :required
           raise "Expected argument for option '#{option}', got none" unless current.first
 
+          if pending.length == 1
+            minimum_count = count_arguments(:required) + count_arguments(:vararg)
+            if current.length <= minimum_count
+              raise "Ambiguous argument for option '#{option}', not enough remaining positional arguments"
+            end
+          end
+
           @argument_values[option_name] = current.shift
-          @option_took_argument = option
         elsif argument_arity == :optional && current.first
           if pending.length == 1
             required_count = count_arguments(:required)
-            if current.length <= required_count or @argument_names.length != required_count
+            if current.length <= required_count or required_count != @argument_names.length
               raise "Ambiguous argument for option '#{option}', please use -- before positional arguments"
             end
           end
 
           @argument_values[option_name] = current.shift
-          @option_took_argument = option
-        else
-          @option_took_argument = nil
         end
 
         pending.shift if current.empty?
@@ -206,10 +209,6 @@ class OptionsByExample
         else
           raise %{unreachable given the range check above}
         # :nocov:
-        end
-
-        if @option_took_argument
-          msg += " (considering #{@option_took_argument} takes an argument)"
         end
 
         raise msg
