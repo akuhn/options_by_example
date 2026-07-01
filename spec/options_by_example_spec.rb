@@ -74,10 +74,13 @@ describe OptionsByExample do
       expect(this.argument_source).to eq 'photos'
     end
 
-    it 'rejects ambiguous positionals' do
-      expect {
-        this.parse %w{--quiet --compress photos}
-      }.to abort_with "Ambiguous argument for option '--compress', please use -- before positional arguments"
+    it 'keeps required positional when optional option argument is omitted' do
+      this.parse %w{--quiet --compress photos}
+
+      expect(this.include_quiet?).to be true
+      expect(this.include_compress?).to be true
+      expect(this.argument_compress).to be nil
+      expect(this.argument_source).to eq 'photos'
     end
 
     it 'treats double-dash after option as omitted optional argument' do

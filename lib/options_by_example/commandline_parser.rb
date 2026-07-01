@@ -137,6 +137,9 @@ class OptionsByExample
         elsif argument_arity == :optional && current.first
           if pending.length == 1
             required_count = count_arguments(:required)
+            if current.length <= required_count and required_count == @argument_names.length
+              return current
+            end
             if current.length <= required_count or required_count != @argument_names.length
               raise "Ambiguous argument for option '#{option}', please use -- before positional arguments"
             end
