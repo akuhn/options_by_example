@@ -352,6 +352,26 @@ describe OptionsByExample do
       }.to abort_with "Found unknown option '--foo'"
     end
 
+    it 'raises an error for duplicate flag options' do
+      pending 'known to fail'
+
+      expect {
+        OptionsByExample
+          .new('Usage: command [-a] value')
+          .parse %w{-a -a x}
+      }.to abort_with "Found duplicate option '-a'"
+    end
+
+    it 'raises an error for duplicate aliases of the same option' do
+      pending 'known to fail'
+
+      expect {
+        OptionsByExample
+          .new('Usage: command [-a, --all] value')
+          .parse %w{-a --all x}
+      }.to abort_with "Found duplicate option '--all'"
+    end
+
     it 'raises an error for missing arguments' do
       expect {
         this.parse %w{--retries -v example.com 80}

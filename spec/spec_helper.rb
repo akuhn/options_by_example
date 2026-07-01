@@ -20,6 +20,7 @@ end
 RSpec.configure do |config|
 
   config.include Helpers
+  config.pending_failure_output = :skip
 
   config.around :example do |example|
     begin

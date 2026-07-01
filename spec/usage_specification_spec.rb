@@ -15,6 +15,49 @@ describe 'UsageSpecification' do
     expect(usage.argument_names).to be_empty
   end
 
+  describe 'invalid option declarations' do
+
+    it 'rejects duplicate shorthand option aliases' do
+      pending 'known to fail'
+
+      expect {
+        parse_spec 'Usage: command [-x, --extract] [-x, --x-ray] sample'
+      }.to raise_error RuntimeError
+    end
+
+    it 'rejects invalid option alias tokens' do
+      pending 'known to fail'
+
+      expect {
+        parse_spec 'Usage: command [-x, &&&] sample'
+      }.to raise_error RuntimeError
+    end
+
+    it 'rejects trailing commas after option names' do
+      pending 'known to fail'
+
+      expect {
+        parse_spec 'Usage: command [-v,]'
+      }.to raise_error RuntimeError
+    end
+
+    it 'rejects extra option aliases' do
+      pending 'known to fail'
+
+      expect {
+        parse_spec 'Usage: command [-v, --verbose, --debug]'
+      }.to raise_error RuntimeError
+    end
+
+    it 'rejects option-looking argument names' do
+      pending 'known to fail'
+
+      expect {
+        parse_spec 'Usage: command [--verbose --debug]'
+      }.to raise_error RuntimeError
+    end
+  end
+
   it 'chokes on invalid usage syntax' do
     expect {
       parse_spec 'Usage: command arg ^^^ arg'
